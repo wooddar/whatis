@@ -18,13 +18,16 @@ class Team(db.Model):
 
 class Whatis(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    # TODO: Mark this as a foreign key!!
     team_id = db.Column(db.String, db.ForeignKey('team.team_id'), nullable=False,)
-    terminiology = db.Column(db.String, nullable=False)
+    terminology = db.Column(db.String, nullable=False)
     definition = db.Column(db.String, nullable=False)
     notes = db.Column(db.String, nullable=True)
     links = db.Column(db.ARRAY(db.String), nullable=True)
     submitted_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    version = db.Column(db.Integer, nullable=False)
+    owner = db.Column(db.String, nullable=False)
+    point_of_contact = db.Column(db.String, nullable=True)
+
 
     def __repr__(self):
         return f"<Whatis {self.id} for {self.team_id}>"
