@@ -3,13 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from whatis import config
 
-def create_app():
+def create_app(external_config = None):
     app = Flask(__name__)
-    # whatis.config['SQLALCHEMY_DATABASE_URI'] = config.SQLALCHEMY_DATABASE_URI
-    app.config.from_object(config)
+    app.config.from_object(external_config or config)
     db = SQLAlchemy(app)
+    app.db = db
     migrate = Migrate(app, db)
-
     from whatis.routes.slack.slack_route import slack_blueprint
     app.register_blueprint(slack_blueprint, url_prefix='/slack')
 
