@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  whatis:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+    networks:
+      - default
+    volumes:
+      - ./whatis:/whatis
+    depends_on:
+      - postgres
+    links:
+      - postgres:postgres
+    environment:
+      - RUNTIME_CONTEXT=docker-local
+      - PORT=80
+
+  postgres:
+    image: 'postgres:11'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - 54320:5432
+    volumes:
+      - my_dbdata:/var/lib/postgresql/data
+    entrypoint: create.sql /docker-entrypoint-initdb.d
+
+volumes:
+  my_dbdata:

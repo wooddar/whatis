@@ -1,4 +1,3 @@
-
 class SlackInteractionNotRegistered(Exception):
     ...
 
@@ -11,13 +10,16 @@ class SlackInteractionHandler:
 
     def interaction(self, interaction_id):
         def wrap(f):
-            self.add_interaction(interaction_id,f)
+            self.add_interaction(interaction_id, f)
             return f
+
         return wrap
 
     def interact(self, interaction_id):
         r = self._interactions.get(interaction_id)
         if r is None:
-            raise SlackInteractionNotRegistered(f"No function registered fro the interaction ID {interaction_id}")
+            raise SlackInteractionNotRegistered(
+                f"No function registered fro the interaction ID {interaction_id}"
+            )
         else:
             return r

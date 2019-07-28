@@ -4,5 +4,8 @@ run:
 	docker-compose up
 
 shell:
-	docker-compose exec -it bash
+	docker-compose run --rm whatis bash
+
+build:
+	docker-compose build
 
