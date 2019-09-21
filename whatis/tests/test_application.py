@@ -1,8 +1,7 @@
 from whatis.app import create_app
 from flask_testing import TestCase
 from whatis.models import db, Team
-from whatis.routes.slack.slack_route import create_whatis
-import pytest
+from routes.slack_route import create_whatis
 
 
 class TestDbModels(TestCase):

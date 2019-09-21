@@ -1,26 +1,20 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from app import db
+from functools import partial
+from secrets import token_urlsafe
 
+db = SQLAlchemy()
 
-class Team(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    team_name = db.Column(db.String)
-    team_id = db.Column(db.String, unique=True, nullable=False)
-    whatises = db.relationship("Whatis", backref="team", lazy=True)
-    teamadmins = db.relationship("TeamAdmin", backref="team", lazy=True)
-
-    def __repr__(self):
-        return f"<Team {self.team_id}>"
-
+# whatis_id generator
+widgen = partial(token_urlsafe, 5)
 
 class Whatis(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    team_id = db.Column(db.String, db.ForeignKey("team.team_id"), nullable=False)
+    whatis_id = db.Column(db.String, nullable=False, default=widgen)
     terminology = db.Column(db.String, nullable=False)
     definition = db.Column(db.String, nullable=False)
     notes = db.Column(db.String, nullable=True)
-    links = db.Column(db.ARRAY(db.String), nullable=True)
+    links = db.Column(db.String, nullable=True)
     submitted_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
     version = db.Column(db.Integer, nullable=False)
     owner = db.Column(db.String, nullable=False)
@@ -28,12 +22,3 @@ class Whatis(db.Model):
 
     def __repr__(self):
         return f"<Whatis {self.id} for {self.team_id}>"
-
-
-class TeamAdmin(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    team_id = db.Column(db.String, db.ForeignKey("team.team_id"), nullable=False)
-    admin_id = db.Column(db.String, nullable=False)
-
-    def __repr__(self):
-        return f"<TeamAdmin {self.id} for {self.team_id}>"

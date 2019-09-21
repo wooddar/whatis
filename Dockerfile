@@ -10,7 +10,6 @@ COPY ./whatis /whatis
 
 WORKDIR /whatis
 
-#RUN flask db upgrade HEAD
 
 EXPOSE 80:80
 

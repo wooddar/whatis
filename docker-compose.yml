@@ -28,7 +28,6 @@ services:
       - 54320:5432
     volumes:
       - my_dbdata:/var/lib/postgresql/data
-    entrypoint: create.sql /docker-entrypoint-initdb.d
 
 volumes:
   my_dbdata:

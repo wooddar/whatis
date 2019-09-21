@@ -1,5 +1,5 @@
 import pytest
-from whatis.utils.slack.interaction_handler import (
+from utils.interaction_handler import (
     SlackInteractionHandler,
     SlackInteractionNotRegistered,
 )

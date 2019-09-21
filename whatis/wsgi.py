@@ -1,8 +1,8 @@
 import os
 import logging
 
-from app import create_app
-from config import DevelopmentConfig, DockerDevelopmentConfig, ProductionConfig
+from whatis.app import WhatisApp
+from whatis.config import DevelopmentConfig, DockerDevelopmentConfig, ProductionConfig
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -15,4 +15,4 @@ config = {
     "production": ProductionConfig,
 }.get(runtime_context)
 
-app = create_app(config)
+app = WhatisApp(config=config)

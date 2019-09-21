@@ -1,8 +1,8 @@
 import os
 from flask.cli import FlaskGroup
-from config import DevelopmentConfig, DockerDevelopmentConfig, ProductionConfig
-from app import create_app
-from models import Whatis, Team, TeamAdmin
+from whatis.config import DevelopmentConfig, DockerDevelopmentConfig, ProductionConfig
+from whatis.app import WhatisApp
+from whatis.models import Whatis
 from functools import partial
 
 runtime_context = os.getenv("RUNTIME_CONTEXT")
@@ -12,8 +12,8 @@ config = {
     "production": ProductionConfig,
 }[runtime_context]
 
-app = create_app(config)
-cli = FlaskGroup(create_app=partial(create_app, config))
+app = WhatisApp(config=config)
+cli = FlaskGroup(create_app=partial(WhatisApp, config=config))
 
 
 @cli.command("recreate_db")
@@ -29,8 +29,6 @@ def seed_db():
     TEAM_ID = "CCX3T"
     USER_ID = "UX8FHM5"
     models = [
-        Team(team_name="Wooddarteam", team_id=TEAM_ID),
-        TeamAdmin(team_id=TEAM_ID, admin_id=USER_ID),
         Whatis(
             team_id=TEAM_ID,
             terminology="whatis_a",
