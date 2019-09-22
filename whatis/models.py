@@ -8,6 +8,7 @@ db = SQLAlchemy()
 # whatis_id generator
 widgen = partial(token_urlsafe, 5)
 
+
 class Whatis(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     whatis_id = db.Column(db.String, nullable=False, default=widgen)
