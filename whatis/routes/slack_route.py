@@ -1,10 +1,9 @@
 import logging
+import json
 
-from sqlalchemy import desc
 from flask import request, Blueprint, current_app, abort, jsonify
 from slack.web.classes.interactions import SlashCommandInteractiveEvent
 
-from whatis.utils.interaction_handler import SlackInteractionHandler
 from whatis.utils.request import verify_slack_request
 from whatis.utils.message_components import build_whatis_message
 from whatis.proxies import db_session
@@ -24,7 +23,7 @@ def verify_request():
 
 
 @slack_blueprint.route("/whatis", methods=["POST"])
-def get_whatis():
+def get_whatis_rule():
     sc = SlashCommandInteractiveEvent(request.form.to_dict())
 
     terminology = sc.text
@@ -42,12 +41,11 @@ def get_whatis():
         wi = (
             db_session.query(Whatis)
             .filter(Whatis.terminology.ilike(f"{terminology}"))
-            .first()
+            .all()
         )
-    if wi is not None:
-        return jsonify(build_whatis_message(terminology, wi).to_dict())
-    else:
-        return f"Nothing to see here for the query {terminology}"
+    current_app.logger.info(f"Whatis query result for {terminology}: {wi}")
+    message = build_whatis_message(terminology, wi)
+    return jsonify(message.to_dict())
 
 
 @slack_blueprint.route("/actions", methods=["POST"])
@@ -55,12 +53,13 @@ def handle_action():
     request_data = request.form.to_dict()
     current_app.logger.info(request_data)
 
-    action_type = request_data.get("type")
+    action_payload = json.loads(request_data.get("payload"))
+    action_type = action_payload.get("type")
 
     if action_type == "dialog_submission":
-        return handle_dialog_submission(request_data)
+        return handle_dialog_submission(action_payload)
     elif action_type == "block_actions":
-        return handle_block_actions(request_data)
+        return handle_block_actions(action_payload)
     else:
         abort(400, f"Unknown action type {action_type}")
     return "", 204

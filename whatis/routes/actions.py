@@ -1,5 +1,5 @@
 from sqlalchemy import desc
-
+from flask import current_app
 from whatis.proxies import db_session, slack_client
 from whatis.models import Whatis
 from whatis.utils import dialog_components
@@ -7,14 +7,19 @@ from whatis.utils import dialog_components
 
 def send_create_form(trigger_id):
     slack_client.dialog_open(
-        trigger_id=trigger_id, dialog=dialog_components.build_create_new_dialog().to_dict()
+        trigger_id=trigger_id,
+        dialog=dialog_components.build_create_new_dialog().to_dict(),
     )
     return "", 204
 
 
-def send_update_form(trigger_id, id):
+def send_update_form(trigger_id, whatis_id: int):
     slack_client.dialog_open(
-        trigger_id=trigger_id, dialog=dialog_components.build_update_dialog(id=id).to_dict()
+        # TODO: this needs to be whatis numerical ID
+        trigger_id=trigger_id,
+        dialog=dialog_components.build_update_dialog(
+            whatis=get_whatis(whatis_id)
+        ).to_dict(),
     )
     return "", 204
 
@@ -41,6 +46,7 @@ def create_whatis(
     )
     db_session.add(whatis)
     db_session.commit()
+    current_app.logger.info(f"Created the Whatis: {whatis}")
     return whatis
 
 
@@ -66,24 +72,26 @@ def add_whatis_rule():
 
 def delete_whatis(whatis_id):
     wi = db_session.query(Whatis).filter(Whatis.whatis_id == whatis_id).all()
-    db_session.delete(wi)
+    for w in wi:
+        db_session.delete(w)
     db_session.commit()
 
 
-def rollback_whatis(whatis_id):
+def rollback_whatis(id):
     wi = (
         db_session.query(Whatis)
-        .filter(Whatis.whatis_id == whatis_id)
+        .filter(Whatis.id == id)
         .order_by(desc(Whatis.version))
         .first()
     )
     db_session.delete(wi)
     db_session.commit()
-    pass
+
 
 def get_whatis(id: int) -> Whatis:
     wi = db_session.query(Whatis).filter(Whatis.id == id).first()
     return wi
+
 
 def send_all_rule():
     # Rule to send all terminology to a user as a CSV

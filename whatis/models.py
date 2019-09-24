@@ -22,4 +22,4 @@ class Whatis(db.Model):
     point_of_contact = db.Column(db.String, nullable=True)
 
     def __repr__(self):
-        return f"<Whatis {self.id} for {self.team_id}>"
+        return f"<Whatis {self.terminology} - {self.id}>"

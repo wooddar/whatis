@@ -1,4 +1,3 @@
-from typing import Dict, List
 from collections import defaultdict
 
 
@@ -7,7 +6,8 @@ class SlackInteractionNotRegistered(Exception):
 
 
 class SlackInteractionHandler:
-    _interactions = defaultdict(dict)
+    def __init__(self):
+        self._interactions = defaultdict(dict)
 
     def add_interaction(self, interaction_id, f):
 
@@ -22,9 +22,10 @@ class SlackInteractionHandler:
 
     def interact(self, interaction_id, **kwargs):
         r = self._interactions.get(interaction_id)
+
         if r is None:
             raise SlackInteractionNotRegistered(
-                f"No function registered fro the interaction ID {interaction_id}"
+                f"No function registered for the interaction ID {interaction_id}"
             )
         else:
             return r(**kwargs)

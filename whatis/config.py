@@ -12,7 +12,7 @@ class BaseWhatisConfig:
 
 
 class DevelopmentConfig(BaseWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///develop.db"
 
 
 class DockerDevelopmentConfig(BaseWhatisConfig):
