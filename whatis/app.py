@@ -19,6 +19,7 @@ class WhatisApp(Flask):
 
         # Preload default configuration
         self.config.from_object(config)
+        self.config.from_mapping(kwargs)
 
         # Set the secret key for this instance (creating one if one does not exist already)
         self.config["SECRET_KEY"] = self.config["SECRET_KEY"] or str(uuid.uuid4())
@@ -27,8 +28,17 @@ class WhatisApp(Flask):
         if db_uri:
             self.config["SQLALCHEMY_DATABASE_URI"] = db_uri
         logger.debug(
-            u"Using database: {}".format(self.config["SQLALCHEMY_DATABASE_URI"])
+            "Using database: {}".format(self.config["SQLALCHEMY_DATABASE_URI"])
         )
+
+        # DB dialect logic - used for lookup operations
+        db_dialect = self.config["SQLALCHEMY_DATABASE_URI"].split(":")[0]
+        logger.info(f"Attempting to use db dialect {db_dialect}")
+        if not any([i == db_dialect for i in ["postgres", "sqlite"]]):
+            raise RuntimeError(
+                f"Dialect {db_dialect} not supported - please use sqlite or postgres"
+            )
+        self.config["DB_DIALECT"] = db_dialect
 
         # Register database schema with flask app
         sqlalchemy_db.init_app(self)
@@ -45,6 +55,14 @@ class WhatisApp(Flask):
             self.db_init()
         elif db_auto_upgrade:
             self.db_upgrade()
+
+        self.logger.setLevel(logging.DEBUG)
+
+        # Install postgres fuzzystrmatch extension
+        if db_dialect == "postgres":
+            self.logger.info("Enabling Postgres fuzzy string matching")
+            with self.app_context(), self.db.engine.connect() as conn:
+                conn.execute("CREATE EXTENSION IF NOT EXISTS  fuzzystrmatch")
 
         # Register Slack client on the current application instance
         self.sc = WebClient(self.config.get("SLACK_TOKEN"), ssl=False)

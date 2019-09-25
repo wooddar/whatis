@@ -3,9 +3,11 @@ import json
 
 from flask import request, Blueprint, current_app, abort, jsonify
 from slack.web.classes.interactions import SlashCommandInteractiveEvent
+from sqlalchemy import func
 
 from whatis.utils.request import verify_slack_request
 from whatis.utils.message_components import build_whatis_message
+from whatis.utils.lookups import lookup_whatis
 from whatis.proxies import db_session
 from whatis.models import Whatis
 from whatis.routes.actions import send_create_form
@@ -31,18 +33,12 @@ def get_whatis_rule():
     if terminology == "create":
         return send_create_form(sc.trigger_id)
 
-    if len(terminology) > 5:
-        wi = (
-            db_session.query(Whatis)
-            .filter(Whatis.terminology.ilike(f"%{terminology}%"))
-            .all()
-        )
-    else:
-        wi = (
-            db_session.query(Whatis)
-            .filter(Whatis.terminology.ilike(f"{terminology}"))
-            .all()
-        )
+    elif terminology == "":
+        return "Oops! you need to give me something to search - try /whatis eod"
+
+    # TODO: only max version for each `whatis_id` to be returned
+    # TODO: Different point of contact to owner changes
+    wi = lookup_whatis(terminology)
     current_app.logger.info(f"Whatis query result for {terminology}: {wi}")
     message = build_whatis_message(terminology, wi)
     return jsonify(message.to_dict())

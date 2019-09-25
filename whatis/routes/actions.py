@@ -31,7 +31,7 @@ def create_whatis(
     notes=None,
     links=None,
     version=None,
-    owner=None,
+    added_by=None,
     point_of_contact=None,
 ) -> Whatis:
     whatis = Whatis(
@@ -41,7 +41,7 @@ def create_whatis(
         notes=notes,
         version=version,
         links=links,
-        owner=owner,
+        added_by=added_by,
         point_of_contact=point_of_contact,
     )
     db_session.add(whatis)
@@ -50,7 +50,7 @@ def create_whatis(
     return whatis
 
 
-def update_whatis(id, definition, notes, links, owner, point_of_contact) -> Whatis:
+def update_whatis(id, definition, notes, links, added_by, point_of_contact) -> Whatis:
     wi = db_session.query(Whatis).filter(Whatis.id == id).first()
 
     create_whatis(
@@ -60,14 +60,10 @@ def update_whatis(id, definition, notes, links, owner, point_of_contact) -> What
         notes=notes,
         links=links,
         version=wi.version + 1,
-        owner=owner,
+        added_by=added_by,
         point_of_contact=point_of_contact,
     )
     return wi
-
-
-def add_whatis_rule():
-    pass
 
 
 def delete_whatis(whatis_id):
@@ -94,5 +90,5 @@ def get_whatis(id: int) -> Whatis:
 
 
 def send_all_rule():
-    # Rule to send all terminology to a user as a CSV
+    # TODO: Rule to send all terminology to a user as a CSV
     ...

@@ -18,7 +18,7 @@ class Whatis(db.Model):
     links = db.Column(db.String, nullable=True)
     submitted_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
     version = db.Column(db.Integer, nullable=False)
-    owner = db.Column(db.String, nullable=False)
+    added_by = db.Column(db.String, nullable=False)
     point_of_contact = db.Column(db.String, nullable=True)
 
     def __repr__(self):

@@ -4,6 +4,12 @@ from whatis import constants
 from slack.web.classes import blocks, elements, messages, objects
 
 
+def build_whatis_action_confirm(title: str, text: str) -> objects.ConfirmObject:
+    return objects.ConfirmObject(
+        title=title, text=text, confirm="Proceed", deny="Run Away!"
+    )
+
+
 def build_whatis_actions(whatis: Whatis) -> blocks.ActionsBlock:
     # TODO: Add in confirmations
     update_whatis_button = elements.ButtonElement(
@@ -11,15 +17,30 @@ def build_whatis_actions(whatis: Whatis) -> blocks.ActionsBlock:
         style="primary",
         action_id=constants.UPDATE_WHATIS_ID,
         value=str(whatis.id),
+        confirm=build_whatis_action_confirm(
+            "Update Whatis",
+            'Are you sure you want to update this Whatis? If you do, you will be listed under "Added by"',
+        ),
     )
     rollback_whatis_button = elements.ButtonElement(
-        text="Rollback", action_id=constants.ROLLBACK_WHATIS_ID, value=str(whatis.id)
+        text="Rollback",
+        action_id=constants.ROLLBACK_WHATIS_ID,
+        value=str(whatis.id),
+        confirm=build_whatis_action_confirm(
+            "Rollback Whatis",
+            "Are you sure you would like to rollback this Whatis to its last version?",
+        ),
     )
     delete_whatis_button = elements.ButtonElement(
         text="Delete",
         style="danger",
         action_id=constants.DELETE_WHATIS_ID,
         value=whatis.whatis_id,
+        confirm=build_whatis_action_confirm(
+            "Delete Whatis",
+            "This will permanently delete this Whatis along with its whole version history, "
+            "are you sure you want to do this?",
+        ),
     )
 
     return blocks.ActionsBlock(
@@ -32,14 +53,22 @@ def build_whatis_component(
 ) -> List[Union[blocks.DividerBlock, blocks.SectionBlock, blocks.ActionsBlock]]:
 
     whatis_fields = []
-    for field in ["terminology", "definition", "notes", "links", "point_of_contact"]:
+    for field in [
+        "terminology",
+        "definition",
+        "notes",
+        "links",
+        "point_of_contact",
+        "added_by",
+    ]:
         # My god I want walrus operators already
         value = getattr(whatis, field)
         if value is not None:
             if field == "links":
-                value = "-" + "\n- ".join(value.split(","))
-            elif field == "point_of_contact":
-                value = f"<@{value}>"
+                value = "- " + "\n- ".join(value.split(","))
+            elif field in ["added_by", "point_of_contact"]:
+                mention_char = "@" if value.startswith("U") else "#"
+                value = f"<{mention_char}{value}>"
             whatis_fields.append(f"*{field.capitalize().replace('_',' ')}*\n{value}\n")
     return [
         blocks.SectionBlock(fields=whatis_fields),
@@ -58,7 +87,7 @@ def build_whatis_component(
     ]
 
 
-def build_whatis_footer(query: str) -> blocks.ActionsBlock:
+def build_whatis_footer() -> blocks.ActionsBlock:
     add_new_button = elements.ButtonElement(
         text="Add a new Whatis!",
         style="primary",
@@ -73,11 +102,13 @@ def build_whatis_message(
 ) -> messages.Message:
     block_list = []
     if whatises:
-        block_list.append(
-            blocks.SectionBlock(
-                text=f"*The following result(s) best matched the original_query:* "
-                f"{original_query}"
-            )
+        block_list.extend(
+            [
+                blocks.SectionBlock(
+                    text=f"*The following result(s) best matched :* {original_query}"
+                ),
+                blocks.DividerBlock(),
+            ]
         )
         for wi in whatises:
             block_list.extend(build_whatis_component(wi))
@@ -89,5 +120,5 @@ def build_whatis_message(
             )
         )
 
-    block_list.append(build_whatis_footer(original_query))
+    block_list.append(build_whatis_footer())
     return messages.Message(blocks=block_list, text="Whatis results!")

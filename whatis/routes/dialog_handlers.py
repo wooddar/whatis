@@ -8,6 +8,7 @@ from whatis.utils.dialog_components import (
     NOTES_KEY,
     TERMINOLOGY_KEY,
     DEFINITION_KEY,
+    POINT_OF_CONTACT_KEY,
 )
 from whatis.routes.actions import create_whatis, update_whatis
 from whatis import constants
@@ -34,8 +35,8 @@ def create_dialog_sumbit_action(data: DialogInteractiveEvent):
         notes=submission.get(NOTES_KEY),
         links=submission.get(LINKS_KEY),
         version=1,
-        owner=data.user.id,
-        point_of_contact=data.user.id,
+        added_by=data.user.id,
+        point_of_contact=submission.get(POINT_OF_CONTACT_KEY),
     )
     return basic_responder_response(
         f"Successfully created the Whatis {whatis.terminology} :tada:"
@@ -51,8 +52,8 @@ def update_dialog_sumbit_action(data: DialogInteractiveEvent):
         definition=submission.get(DEFINITION_KEY),
         notes=submission.get(NOTES_KEY),
         links=submission.get(LINKS_KEY),
-        owner=data.user.id,
-        point_of_contact=data.user.id,
+        added_by=data.user.id,
+        point_of_contact=submission.get(POINT_OF_CONTACT_KEY),
     )
     return basic_responder_response(
         f"Successfully updated the Whatis {whatis.terminology} :tada:"

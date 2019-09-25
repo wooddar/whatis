@@ -6,13 +6,14 @@ load_dotenv(find_dotenv())
 
 class BaseWhatisConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    ADMIN_IDS = None
-    ADMIN_CHANNEL = None
+    ADMIN_USER_IDS = None
+    ADMIN_CHANNEL_IDS = None
     SLACK_TOKEN = os.getenv("SLACK_TOKEN")
 
 
 class DevelopmentConfig(BaseWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = "sqlite:///develop.db"
+    # SQLALCHEMY_DATABASE_URI = "sqlite:///develop.db"
+    SQLALCHEMY_DATABASE_URI = "postgres://postgres@localhost:5432/whatis"
 
 
 class DockerDevelopmentConfig(BaseWhatisConfig):

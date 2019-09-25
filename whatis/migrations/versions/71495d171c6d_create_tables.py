@@ -27,7 +27,7 @@ def upgrade():
         sa.Column("links", sa.String(), nullable=True),
         sa.Column("submitted_at", sa.DateTime(), nullable=False),
         sa.Column("version", sa.Integer(), nullable=False),
-        sa.Column("owner", sa.String(), nullable=False),
+        sa.Column("added_by", sa.String(), nullable=False),
         sa.Column("point_of_contact", sa.String(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )

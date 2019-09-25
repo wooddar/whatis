@@ -8,6 +8,7 @@ TERMINOLOGY_KEY = "terminology"
 DEFINITION_KEY = "definition"
 NOTES_KEY = "notes"
 LINKS_KEY = "links"
+POINT_OF_CONTACT_KEY = "pointofcontact"
 
 
 def build_create_new_dialog(
@@ -47,6 +48,12 @@ def build_create_new_dialog(
             optional=True,
             hint="Comma separated links to documentation",
             min_length=8,
+        )
+        .conversation_selector(
+            label="Point of Contact",
+            name=POINT_OF_CONTACT_KEY,
+            optional=True,
+            placeholder="Where is the best place to ask about this",
         )
     )
     return d
@@ -91,6 +98,13 @@ def build_update_dialog(whatis: Whatis) -> dialogs.DialogBuilder:
             hint="Comma separated links to documentation",
             min_length=8,
             value=whatis.links,
+        )
+        .conversation_selector(
+            label="Point of Contact",
+            name=POINT_OF_CONTACT_KEY,
+            optional=True,
+            value=whatis.point_of_contact,
+            placeholder=whatis.added_by,
         )
     )
     return d
