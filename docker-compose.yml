@@ -13,8 +13,6 @@ services:
       - ./whatis:/whatis
     depends_on:
       - postgres
-    links:
-      - postgres:postgres
     environment:
       - RUNTIME_CONTEXT=docker-local
       - PORT=80

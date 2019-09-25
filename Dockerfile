@@ -4,7 +4,7 @@ COPY ./requirements.txt .
 
 RUN pip install -r ./requirements.txt
 
-ENV PYTHONPATH=/whatis
+ENV PYTHONPATH=/
 
 COPY ./whatis /whatis
 
@@ -13,5 +13,4 @@ WORKDIR /whatis
 
 EXPOSE 80:80
 
-CMD flask run -p $PORT -h 0.0.0.0
-
+CMD gunicorn wsgi:app -b 0.0.0.0:80

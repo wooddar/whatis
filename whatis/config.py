@@ -1,28 +1,21 @@
 import os
 from dotenv import find_dotenv, load_dotenv
+from whatis.default_config import DefaultWhatisConfig
 
 load_dotenv(find_dotenv())
 
 
-class BaseWhatisConfig:
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    ADMIN_USER_IDS = None
-    ADMIN_CHANNEL_IDS = None
-    SLACK_TOKEN = os.getenv("SLACK_TOKEN")
-
-
-class DevelopmentConfig(BaseWhatisConfig):
-    # SQLALCHEMY_DATABASE_URI = "sqlite:///develop.db"
+class DevelopmentConfig(DefaultWhatisConfig):
     SQLALCHEMY_DATABASE_URI = "postgres://postgres@localhost:5432/whatis"
 
 
-class DockerDevelopmentConfig(BaseWhatisConfig):
+class DockerDevelopmentConfig(DefaultWhatisConfig):
     SQLALCHEMY_DATABASE_URI = "postgres://postgres:password@postgres:5432/whatis"
 
 
-class StagingConfig(BaseWhatisConfig):
+class StagingConfig(DefaultWhatisConfig):
     SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
 
 
-class ProductionConfig(BaseWhatisConfig):
+class ProductionConfig(DefaultWhatisConfig):
     SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")

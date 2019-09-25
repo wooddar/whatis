@@ -1,14 +1,7 @@
 from flask import current_app
-from slack.web.classes.interactions import MessageInteractiveEvent, InteractiveEvent
+from slack.web.classes.interactions import MessageInteractiveEvent
 
-from whatis.proxies import slack_client
 from whatis.utils.interaction_handler import SlackInteractionHandler
-from whatis.utils.dialog_components import (
-    LINKS_KEY,
-    NOTES_KEY,
-    TERMINOLOGY_KEY,
-    DEFINITION_KEY,
-)
 from whatis.utils.responder import webhook_response, basic_responder_response
 from whatis.routes.actions import (
     send_create_form,
@@ -16,8 +9,7 @@ from whatis.routes.actions import (
     delete_whatis,
     rollback_whatis,
 )
-from whatis import constants
-
+from routes import constants
 
 block_interactor = SlackInteractionHandler()
 

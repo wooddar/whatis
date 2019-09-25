@@ -5,8 +5,7 @@ from slack.web.client import WebClient
 from flask import request, abort, current_app
 from functools import partial
 
-from whatis import constants
-
+from routes import constants
 
 logger = logging.getLogger(__name__)
 

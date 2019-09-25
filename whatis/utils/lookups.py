@@ -6,10 +6,9 @@ from sqlalchemy import func, and_
 
 
 def postgres_lookup(input: str) -> List[Whatis]:
-    # return db_session.query(Whatis).filter(func.levenshtein(func.lower(Whatis.terminology), query.lower()) < 2).group_by(Whatis.whatis_id)
     subquery = (
         db_session.query(Whatis.whatis_id, func.max(Whatis.version).label("version"))
-        .filter(func.lower(Whatis.terminology) == input.lower())
+        .filter(func.levenshtein(func.lower(Whatis.terminology), input.lower()) < 2)
         .group_by(Whatis.whatis_id)
         .subquery("s2")
     )

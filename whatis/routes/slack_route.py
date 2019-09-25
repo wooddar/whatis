@@ -36,10 +36,8 @@ def get_whatis_rule():
     elif terminology == "":
         return "Oops! you need to give me something to search - try /whatis eod"
 
-    # TODO: only max version for each `whatis_id` to be returned
-    # TODO: Different point of contact to owner changes
     wi = lookup_whatis(terminology)
-    current_app.logger.info(f"Whatis query result for {terminology}: {wi}")
+    current_app.logger.debug(f"Whatis query result for {terminology}: {wi}")
     message = build_whatis_message(terminology, wi)
     return jsonify(message.to_dict())
 
@@ -47,7 +45,7 @@ def get_whatis_rule():
 @slack_blueprint.route("/actions", methods=["POST"])
 def handle_action():
     request_data = request.form.to_dict()
-    current_app.logger.info(request_data)
+    current_app.logger.debug(request_data)
 
     action_payload = json.loads(request_data.get("payload"))
     action_type = action_payload.get("type")
