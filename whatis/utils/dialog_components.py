@@ -1,7 +1,7 @@
 import typing
 from slack.web.classes import dialogs
 
-from routes import constants
+import constants
 from whatis.models import Whatis
 
 TERMINOLOGY_KEY = "terminology"

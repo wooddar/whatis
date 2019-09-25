@@ -1,6 +1,6 @@
 from typing import List, Union
 from whatis.models import Whatis
-from routes import constants
+import constants
 from slack.web.classes import blocks, elements, messages, objects
 
 
