@@ -10,8 +10,7 @@ def build_whatis_action_confirm(title: str, text: str) -> objects.ConfirmObject:
     )
 
 
-def build_whatis_actions(whatis: Whatis) -> blocks.ActionsBlock:
-    # TODO: Add in confirmations
+def build_whatis_actions(whatis: Whatis, is_admin: bool = False) -> blocks.ActionsBlock:
     update_whatis_button = elements.ButtonElement(
         text="Update",
         style="primary",
@@ -42,15 +41,21 @@ def build_whatis_actions(whatis: Whatis) -> blocks.ActionsBlock:
             "are you sure you want to do this?",
         ),
     )
-
-    return blocks.ActionsBlock(
-        elements=[update_whatis_button, rollback_whatis_button, delete_whatis_button]
-    )
+    actions = [update_whatis_button]
+    if is_admin is True:
+        actions.extend([rollback_whatis_button, delete_whatis_button])
+    return blocks.ActionsBlock(elements=actions)
 
 
 def build_whatis_component(
-    whatis: Whatis
+    whatis: Whatis, is_admin: bool = False
 ) -> List[Union[blocks.DividerBlock, blocks.SectionBlock, blocks.ActionsBlock]]:
+    """
+    Build the component that will actually hold the whatis including actions relating to it
+    :param whatis:
+    :param is_admin:
+    :return:
+    """
 
     whatis_fields = []
     for field in [
@@ -73,7 +78,7 @@ def build_whatis_component(
     return [
         blocks.SectionBlock(fields=whatis_fields),
         # Add whatis action buttons
-        build_whatis_actions(whatis),
+        build_whatis_actions(whatis, is_admin),
         # Add whatis contextual information
         blocks.ContextBlock(
             elements=[
@@ -87,7 +92,8 @@ def build_whatis_component(
     ]
 
 
-def build_whatis_footer() -> blocks.ActionsBlock:
+def build_whatis_footer(is_admin: bool = False) -> blocks.ActionsBlock:
+    # TODO: View all button
     add_new_button = elements.ButtonElement(
         text="Add a new Whatis!",
         style="primary",
@@ -98,7 +104,7 @@ def build_whatis_footer() -> blocks.ActionsBlock:
 
 
 def build_whatis_message(
-    original_query: str, whatises: List[Whatis]
+    original_query: str, whatises: List[Whatis], is_admin: bool = False
 ) -> messages.Message:
     block_list = []
     if whatises:
@@ -111,7 +117,7 @@ def build_whatis_message(
             ]
         )
         for wi in whatises:
-            block_list.extend(build_whatis_component(wi))
+            block_list.extend(build_whatis_component(wi, is_admin=is_admin))
     else:
         block_list.append(
             blocks.SectionBlock(
@@ -120,5 +126,5 @@ def build_whatis_message(
             )
         )
 
-    block_list.append(build_whatis_footer())
+    block_list.append(build_whatis_footer(is_admin=is_admin))
     return messages.Message(blocks=block_list, text="Whatis results!")

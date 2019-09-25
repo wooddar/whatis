@@ -2,7 +2,9 @@ import os
 import uuid
 import logging
 
+from cachetools import cached, TTLCache
 from slack.web.client import WebClient
+from slack.errors import SlackApiError
 from flask import Flask
 from flask_migrate import Migrate
 from .models import db as sqlalchemy_db
@@ -71,6 +73,25 @@ class WhatisApp(Flask):
 
         self.register_blueprint(slack_blueprint, url_prefix="/slack")
 
+        if not all(
+            [
+                type(self.config[i]) == list
+                for i in ["ADMIN_USER_IDS", "ADMIN_CHANNEL_IDS"]
+            ]
+        ):
+            raise RuntimeError(
+                "ADMIN_USER_IDS and ADMIN_CHANNEL_IDS must be lists of Admin user IDs or channel IDs"
+            )
+
+        try:
+            au = self.admin_users
+            self.logger.info(f"Initial Admin users set as {au}")
+        except SlackApiError as s:
+            raise RuntimeError(
+                f"Failed to get Admin users from specified Admin channels - are you sure the whatis bot "
+                f"is invited and has the necessary scopes {s}"
+            )
+
         # Register a basic route for healthchecking
         @self.route("/ping")
         def healthcheck():
@@ -105,6 +126,25 @@ class WhatisApp(Flask):
 
             context = MigrationContext.configure(conn)
             return context.get_current_revision()
+
+    @property
+    @cached(TTLCache(ttl=3600, maxsize=2048))
+    def admin_users(self):
+        """
+        Get all users approved as admins
+        """
+        channel_admin_members = []
+        for channel in self.config["ADMIN_CHANNEL_IDS"]:
+            try:
+                channel_admin_members.extend(
+                    self.sc.conversations_members(channel=channel)["members"]
+                )
+            except SlackApiError as s:
+                self.logger.warning(
+                    f"Could not get members from the specified Admin channel {channel} has the whatis "
+                    f"bot been removed or scopes been changed? {s}"
+                )
+        return self.config["ADMIN_USER_IDS"] + channel_admin_members
 
     def db_upgrade(self):
         with self.app_context():

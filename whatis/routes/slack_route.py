@@ -38,7 +38,8 @@ def get_whatis_rule():
 
     wi = lookup_whatis(terminology)
     current_app.logger.debug(f"Whatis query result for {terminology}: {wi}")
-    message = build_whatis_message(terminology, wi)
+    is_admin = sc.user.id in current_app.admin_users or current_app.admin_users == []
+    message = build_whatis_message(terminology, wi, is_admin=is_admin)
     return jsonify(message.to_dict())
 
 

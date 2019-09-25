@@ -6,7 +6,7 @@ load_dotenv(find_dotenv())
 
 class DefaultWhatisConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    ADMIN_USER_IDS = None
-    ADMIN_CHANNEL_IDS = None
+    ADMIN_USER_IDS = []
+    ADMIN_CHANNEL_IDS = []
     SLACK_TOKEN = os.getenv("SLACK_TOKEN")
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
