@@ -69,7 +69,7 @@ class WhatisApp(Flask):
         # Register Slack client on the current application instance
         self.sc = WebClient(self.config.get("SLACK_TOKEN"), ssl=False)
 
-        from routes.slack_route import slack_blueprint
+        from whatis.routes.slack_route import slack_blueprint
 
         self.register_blueprint(slack_blueprint, url_prefix="/slack")
 

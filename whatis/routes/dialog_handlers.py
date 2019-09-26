@@ -11,7 +11,7 @@ from whatis.utils.dialog_components import (
     POINT_OF_CONTACT_KEY,
 )
 from whatis.routes.actions import create_whatis, update_whatis
-import constants
+from whatis import constants
 
 dialog_interactor = SlackInteractionHandler()
 

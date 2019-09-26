@@ -52,7 +52,7 @@ def lookup_whatis(input: str) -> List[Whatis]:
         return postgres_lookup(input)
     elif dialect == "sqlite":
         current_app.logger.debug(f"Using sqlite to lookup {input}")
-        return postgres_lookup(input)
+        return sqlite_lookup(input)
     else:
         raise RuntimeError(
             f"Unrecognised SQL dialect {dialect} - I don't even know how you got here!"

@@ -4,8 +4,7 @@ from typing import List
 from slack.web.client import WebClient
 from flask import request, abort, current_app
 from functools import partial
-
-import constants
+from whatis import constants
 
 logger = logging.getLogger(__name__)
 

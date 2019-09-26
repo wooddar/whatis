@@ -12,7 +12,7 @@ class DevelopmentConfig(DefaultWhatisConfig):
 
 
 class DockerDevelopmentConfig(DefaultWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = "postgres://postgres:password@postgres:5432/whatis"
+    SQLALCHEMY_DATABASE_URI = "postgres://postgres:password@postgres:5432/postgres"
     ADMIN_USER_IDS = ["U9KR5QZA5"]
     ADMIN_CHANNEL_IDS = ["C9Z2KJEVB"]
 

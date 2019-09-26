@@ -9,7 +9,7 @@ from whatis.routes.actions import (
     delete_whatis,
     rollback_whatis,
 )
-import constants
+from whatis import constants
 
 block_interactor = SlackInteractionHandler()
 
