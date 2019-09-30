@@ -127,12 +127,8 @@ class WhatisApp(Flask):
             context = MigrationContext.configure(conn)
             return context.get_current_revision()
 
-    @property
     @cached(TTLCache(ttl=3600, maxsize=2048))
-    def admin_users(self):
-        """
-        Get all users approved as admins
-        """
+    def _get_admin_users(self):
         channel_admin_members = []
         for channel in self.config["ADMIN_CHANNEL_IDS"]:
             try:
@@ -145,6 +141,13 @@ class WhatisApp(Flask):
                     f"bot been removed or scopes been changed? {s}"
                 )
         return self.config["ADMIN_USER_IDS"] + channel_admin_members
+
+    @property
+    def admin_users(self):
+        """
+        Get all users approved as admins
+        """
+        return self._get_admin_users()
 
     def db_upgrade(self):
         with self.app_context():

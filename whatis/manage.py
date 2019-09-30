@@ -5,7 +5,7 @@ from whatis.app import WhatisApp
 from whatis.models import Whatis
 from functools import partial
 
-runtime_context = os.getenv("RUNTIME_CONTEXT")
+runtime_context = os.getenv("RUNTIME_CONTEXT") or 'local'
 config = {
     "local": DevelopmentConfig,
     "docker-local": DockerDevelopmentConfig,
