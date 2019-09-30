@@ -2,6 +2,7 @@ import os
 import typing
 from dotenv import find_dotenv, load_dotenv
 from whatis.default_config import DefaultWhatisConfig
+
 load_dotenv(find_dotenv())
 
 
@@ -23,4 +24,3 @@ class StagingConfig(DefaultWhatisConfig):
 
 class ProductionConfig(DefaultWhatisConfig):
     SQLALCHEMY_DATABASE_URI = os.environ["SQLALCHEMY_DATABASE_URI"]
-
