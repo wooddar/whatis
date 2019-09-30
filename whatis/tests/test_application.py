@@ -1,12 +1,31 @@
 import os
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from json import loads, dumps
-from unittest import TestCase
 from whatis.app import WhatisApp
 from whatis.models import Whatis
 from whatis.default_config import DefaultWhatisConfig
+from whatis.utils.dialog_components import (
+    TERMINOLOGY_KEY,
+    DEFINITION_KEY,
+    NOTES_KEY,
+    LINKS_KEY,
+    POINT_OF_CONTACT_KEY,
+)
+
 from whatis import constants
+
+TEST_WHATIS = Whatis(
+    id=2,
+    whatis_id="sfCw",
+    terminology="UDF",
+    definition="User defined function",
+    notes="A common feature to many SQL languages",
+    links="google,facebook",
+    version=0,
+    added_by="UX8HGN",
+    point_of_contact="C5TY9IL",
+)
 
 
 class TestingConfig(DefaultWhatisConfig):
@@ -30,31 +49,45 @@ def create_slash_command_input(text, user_id="U9KR5QZA5"):
 
 
 def create_block_action(action_id, block_id, action_value, user_id="U9KR5QZA5"):
-    return dict(payload=dumps(dict(
-        user=dict(id="U9KR5QZA5", username="some dude"),
-        response_url="https://slack.webhook.com/TN04R",
-        channel=dict(id="CX6TY", name="some channel"),
-        trigger_id="1032423.342",
-        command="/whatis",
-        team=dict(id="C4RRSV", domain="team mcteam"),
-        type="block_actions",
-        container=dict(message_ts='2242234.234'),
-        actions=[dict(action_id=action_id, block_id=block_id, value=action_value)],
-    )))
-
-
-def create_dialog_submit_action(text, user_id="U9KR5QZA5"):
     return dict(
-        text=text,
-        response_url="https://slack.webhook.com/TN04R",
-        user_id=user_id,
-        user_name="Steff Nezos",
-        channel_id="C9Z2KJTTB",
-        channel_name="cat-factoids",
-        trigger_id="1032423.342",
-        command="/whatis",
-        team_id="C4RRSV",
-        team_domain="parragon",
+        payload=dumps(
+            dict(
+                user=dict(id="U9KR5QZA5", username="some dude"),
+                response_url="https://slack.webhook.com/TN04R",
+                channel=dict(id="CX6TY", name="some channel"),
+                trigger_id="1032423.342",
+                command="/whatis",
+                team=dict(id="C4RRSV", domain="team mcteam"),
+                type="block_actions",
+                container=dict(message_ts="2242234.234"),
+                actions=[
+                    dict(action_id=action_id, block_id=block_id, value=action_value)
+                ],
+            )
+        )
+    )
+
+
+def create_dialog_submit_action(callback_id):
+    return dict(
+        payload=dumps(
+            dict(
+                response_url="https://slack.webhook.com/TN04R",
+                type="dialog_submission",
+                user=dict(id="U9KR5QZA5", name="some dude"),
+                channel=dict(id="CX6TY", name="some channel"),
+                team=dict(id="C4RRSV", domain="team mcteam"),
+                callback_id=callback_id,
+                state="",
+                submission={
+                    POINT_OF_CONTACT_KEY: TEST_WHATIS.added_by,
+                    LINKS_KEY: TEST_WHATIS.links,
+                    NOTES_KEY: TEST_WHATIS.notes,
+                    TERMINOLOGY_KEY: TEST_WHATIS.terminology,
+                    DEFINITION_KEY: TEST_WHATIS.definition,
+                },
+            )
+        )
     )
 
 
@@ -78,6 +111,7 @@ def client():
         client.db.session.add(
             Whatis(
                 terminology="Lost customer",
+                whatis_id="wE5Bn",
                 definition="When a customer does not make any repeat transactions for > 20 days",
                 notes="Decided on by Data science team",
                 links=None,
@@ -89,6 +123,7 @@ def client():
         client.db.session.add(
             Whatis(
                 terminology="Lost customer",
+                whatis_id="wE5Bn",
                 definition="When a customer does not make any repeat transactions for > 20 days",
                 notes="Decided on by Data science team and CIO",
                 links="jira",
@@ -106,11 +141,17 @@ def test_client_dialect(client):
 
 
 def test_get_whatis(client):
-    resp = client.post("/slack/whatis", query_string=create_slash_command_input(text="eod"))
+    resp = client.post("/slack/whatis", data=create_slash_command_input(text="eod"))
+    assert len(loads(resp.data)["blocks"]) == 7
+    resp = client.post(
+        "/slack/whatis", data=create_slash_command_input(text="Lost customer")
+    )
     assert len(loads(resp.data)["blocks"]) == 7
 
 
-def test_action_handlers(client):
+@patch("requests.post")
+def test_create_new(rp, client):
+    # Press the Add new whatis button
     resp = client.post(
         "/slack/actions",
         data=create_block_action(
@@ -119,4 +160,21 @@ def test_action_handlers(client):
             action_value=constants.CREATE_NEW_WHATIS_ID,
         ),
     )
-    assert resp.data.decode() == ''
+    assert resp.data.decode() == ""
+
+    # Now submit a dialog
+    resp = client.post(
+        "/slack/actions",
+        data=create_dialog_submit_action(
+            callback_id=constants.CREATE_NEW_WHATIS_ID_SUBMIT
+        ),
+        content_type="application/x-www-form-urlencoded",
+    )
+    assert resp.data.decode() == ""
+    rp.assert_called()
+
+    # Now query that same whatis we just created and ensure it returns result
+    resp = client.post(
+        "/slack/whatis", data=create_slash_command_input(text=TEST_WHATIS.terminology)
+    )
+    assert len(loads(resp.data)["blocks"]) == 7

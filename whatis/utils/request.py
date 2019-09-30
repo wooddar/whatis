@@ -17,7 +17,10 @@ if runtime_context is None or runtime_context not in constants.RUNTIME_CONTEXTS:
 
 
 def get_env_secrets() -> List[str]:
-    return [v for k, v in os.environ.items() if k.startswith("SLACK_SIGNING_SECRET")]
+    env_secrets = [
+        v for k, v in os.environ.items() if k.startswith("SLACK_SIGNING_SECRET")
+    ]
+    return env_secrets
 
 
 validators = [
@@ -30,9 +33,9 @@ def verify_slack_request() -> None:
     """
     This verification function is designed to be placed in a flask before_request handler
     """
-    request_data = request.get_data()
-    current_app.logger.info(request.headers)
-    current_app.logger.info(request_data)
+    request_data = request.get_data().decode()
+    current_app.logger.debug(request.headers)
+    current_app.logger.debug(request_data)
     timestamp = request.headers.get("X-Slack-Request-Timestamp", "")
     slack_sig = request.headers.get("X-Slack-Signature", "")
     request_verified = False
@@ -52,12 +55,10 @@ def verify_slack_request() -> None:
                 for v in validators
             ]
         )
-
+    current_app.logger.info(
+        f"Request verification: {request_verified}, msg: {verify_message}"
+    )
     if request_verified is False:
         if runtime_context not in constants.LOCAL_RUNTIME_CONTEXTS:
             verify_message = "Request signature verification failed"
             abort(403, verify_message)
-        else:
-            current_app.logger.info(
-                f"Request verification: {request_verified}, msg: {verify_message}"
-            )
