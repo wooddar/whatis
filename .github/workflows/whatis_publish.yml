@@ -1,7 +1,7 @@
 name: Whatis publish
 
 on:
-    tag:
+    tags:
 
 jobs:
   build:

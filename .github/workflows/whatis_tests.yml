@@ -35,4 +35,4 @@ jobs:
         pip install pytest
         pytest whatis/tests/
       env:
-        PYTHONPATH: /whatis/
+        PYTHONPATH: /
