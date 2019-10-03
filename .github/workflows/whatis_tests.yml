@@ -36,3 +36,5 @@ jobs:
         pytest whatis/tests/
       env:
         PYTHONPATH: /home/runner/work/whatis/whatis/
+        SLACK_TOKEN: 'Tokeny token'
+        SLACK_SIGNING_SECRET: 'secrety secret'
