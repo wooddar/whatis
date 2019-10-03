@@ -19,8 +19,8 @@ class DockerDevelopmentConfig(DefaultWhatisConfig):
 
 
 class StagingConfig(DefaultWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
+    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI") or ""
 
 
 class ProductionConfig(DefaultWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
+    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI") or ""

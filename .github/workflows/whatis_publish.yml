@@ -1,6 +1,8 @@
 name: Whatis publish
 
-on: [tag]
+on:
+  push:
+    tags:
 
 jobs:
   build:
