@@ -1,4 +1,4 @@
-name: Python application
+name: Whatis test
 
 on: [push]
 
@@ -33,4 +33,4 @@ jobs:
         pip install pytest
         pytest tests/
       env:
-        - PYTHONPATH=`pwd`
+        PYTHONPATH: `pwd`

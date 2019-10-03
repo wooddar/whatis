@@ -7,7 +7,7 @@ load_dotenv(find_dotenv())
 
 
 class DevelopmentConfig(DefaultWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = "postgres://postgres@localhost:5432/whatis"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     ADMIN_USER_IDS: typing.List[str] = []
     ADMIN_CHANNEL_IDS: typing.List[str] = ["GNR4H7JG4"]
 
@@ -19,8 +19,8 @@ class DockerDevelopmentConfig(DefaultWhatisConfig):
 
 
 class StagingConfig(DefaultWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = os.environ["SQLALCHEMY_DATABASE_URI"]
+    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
 
 
 class ProductionConfig(DefaultWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = os.environ["SQLALCHEMY_DATABASE_URI"]
+    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
