@@ -30,7 +30,9 @@ jobs:
         mypy ./whatis/ --ignore-missing-imports
     - name: Test with pytest
       run: |
+        echo $PYTHONPATH
+        ls -a
         pip install pytest
         pytest tests/
       env:
-        PYTHONPATH: `pwd`
+        PYTHONPATH: /whatis/
