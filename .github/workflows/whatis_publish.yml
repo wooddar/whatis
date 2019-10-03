@@ -1,7 +1,8 @@
 name: Whatis publish
 
 on:
-    tags:
+    pull_request:
+      - master
 
 jobs:
   build:
@@ -20,7 +21,7 @@ jobs:
       run: |
         python setup.py sdist bdist_wheel
       env:
-        PYTHONPATH: /whatis/
+        PYTHONPATH: /home/runner/work/whatis/whatis/
     - name: Create distributions
       run: |
         pip install twine
