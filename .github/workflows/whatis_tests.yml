@@ -33,6 +33,6 @@ jobs:
         echo $PYTHONPATH
         ls -a
         pip install pytest
-        pytest tests/
+        pytest whatis/tests/
       env:
         PYTHONPATH: /whatis/
