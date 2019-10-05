@@ -7,8 +7,6 @@ from whatis.app import WhatisApp
 from whatis.config import WhatisConfig
 from whatis.models import Whatis
 
-runtime_context = os.getenv("RUNTIME_CONTEXT") or "local"
-
 
 app = WhatisApp(config=WhatisConfig, DB_AUTO_CREATE=False, DB_AUTO_UPGRADE=False)
 cli = FlaskGroup(create_app=partial(WhatisApp, config=WhatisConfig))

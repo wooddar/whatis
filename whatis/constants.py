@@ -1,7 +1,3 @@
-# Define runtime contexts
-LOCAL_RUNTIME_CONTEXTS = ["local", "docker-local"]
-RUNTIME_CONTEXTS = LOCAL_RUNTIME_CONTEXTS + ["staging", "production"]
-
 # Interaction IDS
 CREATE_NEW_WHATIS_ID = "whatis-create-new"
 CREATE_NEW_WHATIS_ID_SUBMIT = "whatis-create-new"
