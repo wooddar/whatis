@@ -1,26 +1,39 @@
 import os
 import typing
+import logging
 from dotenv import find_dotenv, load_dotenv
-from whatis.default_config import DefaultWhatisConfig
 
 load_dotenv(find_dotenv())
+logger = logging.getLogger(__name__)
 
+class WhatisConfig:
 
-class DevelopmentConfig(DefaultWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
     ADMIN_USER_IDS: typing.List[str] = []
-    ADMIN_CHANNEL_IDS: typing.List[str] = ["GNR4H7JG4"]
+    ADMIN_CHANNEL_IDS: typing.List[str] = []
+    SLACK_TOKEN: str = os.environ.get("SLACK_TOKEN")
+    SLACK_SIGNING_SECRET: str = os.environ.get('SLACK_SIGNING_SECRET')
+    SQLALCHEMY_DATABASE_URI: str = "sqlite:///:memory:"
 
+    @classmethod
+    def from_args(cls, args):
 
-class DockerDevelopmentConfig(DefaultWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = "postgres://postgres:password@postgres:5432/postgres"
-    ADMIN_USER_IDS: typing.List[str] = ["U9KR5QZA5"]
-    ADMIN_CHANNEL_IDS: typing.List[str] = ["C9Z2KJEVB"]
+        if args.db is not None:
+            cls.SQLALCHEMY_DATABASE_URI = args.db
 
+        if args.debug is not None:
+            cls.DEBUG = True
 
-class StagingConfig(DefaultWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI") or ""
+        if args.admin_user_ids is not None:
+            cls.ADMIN_USER_IDS = args.admin_user_ids.split(',')
 
+        if args.admin_channel_ids is not None:
+            cls.ADMIN_CHANNEL_IDS = args.admin_user_ids.split(',')
 
-class ProductionConfig(DefaultWhatisConfig):
-    SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI") or ""
+        if args.slack_token is not None:
+            cls.SLACK_TOKEN = args.slack_token
+
+        if args.slack_signing_secret is not None:
+            cls.SLACK_SIGNING_SECRET = args.slack_signing_secret
+
+        return cls()

@@ -1,11 +1,14 @@
 #!/usr/bin/env python
-import os
+import argparse
 from gunicorn.app.base import BaseApplication
 from gunicorn.six import iteritems
-from whatis.config import DevelopmentConfig
+from whatis.config import WhatisConfig
 from whatis.app import WhatisApp
+import logging
+from pathlib import Path
+from json import loads
 
-os.environ['RUNTIME_CONTEXT'] = 'local'
+logger = logging.getLogger(__name__)
 
 class WhatisDeployer(BaseApplication):
 
@@ -24,4 +27,47 @@ class WhatisDeployer(BaseApplication):
         return self.application
 
 
-WhatisDeployer(WhatisApp(config=DevelopmentConfig())).run()
+parser = argparse.ArgumentParser("Whatis deployment configuration")
+parser.add_argument('--db', dest='db', type=str, help="The URI for the whatis database")
+
+parser.add_argument('--slack_token', dest='slack_token', type=str,
+                          help="The 'xoxb' token of your whatis bot instance")
+
+parser.add_argument('--slack_signing_secret', dest='slack_signing_secret', type=str,
+                          help="The Signing secret for your whatis bot")
+
+parser.add_argument('--debug', dest='debug', type=bool,
+                          help="Should whatis be run in DEBUG mode (skips verification checks)")
+
+parser.add_argument('--admin_user_ids', dest='admin_user_ids', type=str,
+                          help="A comma separated list of Admin User IDs e.g. UX8HGM.UT6YHN1")
+
+parser.add_argument('--admin_channel_ids', dest='admin_channel_ids', type=str,
+                          help="A comma separated list of Slack Channels to get admin users from e.g. CH6N5BT,CY7ILP")
+
+
+def check_preload_path_exists(p):
+    path = str(p)
+    path = Path(path)
+    if path.exists() is False:
+        raise argparse.ArgumentTypeError(f"Preload file not found at path {path}")
+
+    try:
+        loads(open(path).read())
+    except Exception as e:
+        raise argparse.ArgumentTypeError(f"Failed to load whatis preloader file {path} as json\n{e}")
+    return path
+
+
+parser.add_argument('--preload-filepath', dest='preload_filepath', type=check_preload_path_exists,
+                          help="Filepath of json records of new Whatises to add")
+
+parser.add_argument('--port', type=int, dest='port', help="Port to run whatis on")
+
+whatis_args = parser.parse_args()
+
+WhatisDeployer(
+    app=WhatisApp(config=WhatisConfig.from_args(whatis_args),
+                  preload_path=whatis_args.preload_filepath),
+    options=dict(bind=f"0.0.0.0:{whatis_args.port}" or 80)
+).run()

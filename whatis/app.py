@@ -2,21 +2,25 @@ import os
 import uuid
 import logging
 
+from pathlib import Path
 from cachetools import cached, TTLCache
 from slack.web.client import WebClient
 from slack.errors import SlackApiError
 from flask import Flask
+import json
 from flask_migrate import Migrate
-from .models import db as sqlalchemy_db
+from .models import db as sqlalchemy_db, WhatisPreloader, Whatis
+from .constants import WHATIS_FIELDS
 from alembic import command
 from alembic.migration import MigrationContext
+from hashlib import sha224
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
 class WhatisApp(Flask):
-    def __init__(self, db_uri=None, debug=None, config=None, **kwargs):
+    def __init__(self, db_uri=None, config=None, preload_path = None, **kwargs):
         Flask.__init__(self, __name__)
 
         # Preload default configuration
@@ -66,7 +70,13 @@ class WhatisApp(Flask):
             with self.app_context(), self.db.engine.connect() as conn:
                 conn.execute("CREATE EXTENSION IF NOT EXISTS  fuzzystrmatch")
 
+        # Handle preloading an existing Terminology set
+        self.handle_whatis_preload(preload_path)
+
+
         # Register Slack client on the current application instance
+        if all([self.config.get(i) is None for i in ['SLACK_SIGNING_SECRET', 'SLACK_TOKEN']]):
+            raise RuntimeError("Whatis must have both a slack signing secret and slack bot token set")
         self.sc = WebClient(self.config.get("SLACK_TOKEN"), ssl=False)
 
         from whatis.routes.slack_route import slack_blueprint
@@ -165,3 +175,29 @@ class WhatisApp(Flask):
                 self._alembic_config, message=message, autogenerate=autogenerate
             )
         return self
+
+    def handle_whatis_preload(self, preload_path):
+        with self.app_context():
+            if preload_path is not None:
+                filepath = Path(preload_path)
+                if filepath.exists():
+                    file_contents = open(filepath).read()
+                    file_hash = sha224(file_contents.encode()).hexdigest()
+                    existing_preload = self.db.session.query(WhatisPreloader).filter(WhatisPreloader.hash == file_hash).first()
+                    if existing_preload is not None:
+                        self.logger.info(f"Existing whatis load found for the file {existing_preload}, skipping")
+                    else:
+                        raw = json.loads(file_contents)
+                        self.logger.info(f"Attempting to preload terminology from the file {filepath}, {len(raw)} records found")
+                        for raw_whatis in raw:
+                            if all([i in raw_whatis for i in ['terminology', 'definition']]) is False or not set(raw_whatis).issubset(set(WHATIS_FIELDS)):
+                                raise RuntimeError(f"Attempt to preload Terminology failed, Whatis {raw_whatis} has an unrecognised attribute or does not contain both of [terminology, definiton]")
+                            wi = Whatis(**{'version':0, 'added_by': 'WHATIS BOT', **raw_whatis})
+                            self.db.session.add(wi)
+                            self.logger.debug(f"Added the Whatis {wi}")
+                        # Now register the fact that we have loaded this file so it is ignored for future deployments
+                        self.db.session.add(WhatisPreloader(hash=file_hash, filename=str(filepath)))
+                        self.db.session.commit()
+
+                else:
+                    raise FileNotFoundError(f"Preload filepath specified {preload_path} but no file found")

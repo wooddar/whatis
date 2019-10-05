@@ -8,26 +8,6 @@ from whatis import constants
 
 logger = logging.getLogger(__name__)
 
-runtime_context = os.getenv("RUNTIME_CONTEXT")
-if runtime_context is None or runtime_context not in constants.RUNTIME_CONTEXTS:
-    raise RuntimeError(
-        "Cannot validate signatures without a valid RUNTIME_CONTEXT environment variable set. Must be "
-        f"in {constants.RUNTIME_CONTEXTS}"
-    )
-
-
-def get_env_secrets() -> List[str]:
-    env_secrets = [
-        v for k, v in os.environ.items() if k.startswith("SLACK_SIGNING_SECRET")
-    ]
-    return env_secrets
-
-
-validators = [
-    partial(WebClient.validate_slack_signature, signing_secret=i)
-    for i in get_env_secrets()
-]
-
 
 def verify_slack_request() -> None:
     """
@@ -42,23 +22,15 @@ def verify_slack_request() -> None:
     verify_message = ""
 
     if any([timestamp == "", slack_sig == ""]):
-        if runtime_context not in constants.LOCAL_RUNTIME_CONTEXTS:
-            verify_message = "Incorrect verification headers"
-        else:
-            current_app.logger.info(
-                "Slack request missing timestamp or signature headers"
-            )
+            verify_message += "Slack request missing timestamp or signature headers"
     else:
-        request_verified = any(
-            [
-                v(timestamp=timestamp, signature=slack_sig, data=request_data)
-                for v in validators
-            ]
-        )
-    current_app.logger.info(
-        f"Request verification: {request_verified}, msg: {verify_message}"
-    )
+        request_verified = WebClient.validate_slack_signature(signing_secret=current_app.config['SLACK_SIGNING_SECRET'], timestamp=timestamp, signature=slack_sig, data=request_data)
+
     if request_verified is False:
-        if runtime_context not in constants.LOCAL_RUNTIME_CONTEXTS:
+        if current_app.config['DEBUG'] is True:
+            current_app.logger.info(
+                f"Request verification: {request_verified}, msg: {verify_message}"
+            )
+        else:
             verify_message = "Request signature verification failed"
             abort(403, verify_message)

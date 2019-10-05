@@ -10,12 +10,9 @@ services:
     networks:
       - default
     volumes:
-      - ./whatis:/whatis
+      - .:/whatis
     depends_on:
       - postgres
-    environment:
-      - RUNTIME_CONTEXT=docker-local
-      - PORT=80
 
   postgres:
     image: 'postgres:11'

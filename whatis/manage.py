@@ -1,19 +1,15 @@
 import os
 from flask.cli import FlaskGroup
-from whatis.config import DevelopmentConfig, DockerDevelopmentConfig, ProductionConfig
+from whatis.config import WhatisConfig
 from whatis.app import WhatisApp
 from whatis.models import Whatis
 from functools import partial
 
 runtime_context = os.getenv("RUNTIME_CONTEXT") or "local"
-config = {
-    "local": DevelopmentConfig,
-    "docker-local": DockerDevelopmentConfig,
-    "production": ProductionConfig,
-}[runtime_context]
 
-app = WhatisApp(config=config, DB_AUTO_CREATE=False, DB_AUTO_UPGRADE=False)
-cli = FlaskGroup(create_app=partial(WhatisApp, config=config))
+
+app = WhatisApp(config=WhatisConfig, DB_AUTO_CREATE=False, DB_AUTO_UPGRADE=False)
+cli = FlaskGroup(create_app=partial(WhatisApp, config=WhatisConfig))
 
 
 @cli.command("recreate_db")

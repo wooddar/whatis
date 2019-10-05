@@ -58,14 +58,7 @@ def build_whatis_component(
     """
 
     whatis_fields = []
-    for field in [
-        "terminology",
-        "definition",
-        "notes",
-        "links",
-        "point_of_contact",
-        "added_by",
-    ]:
+    for field in constants.WHATIS_FIELDS:
         # My god I want walrus operators already
         value = getattr(whatis, field)
         if value is not None:

@@ -23,3 +23,15 @@ class Whatis(db.Model):  # type: ignore
 
     def __repr__(self):
         return f"<Whatis {self.terminology} - {self.id}>"
+
+
+class WhatisPreloader(db.Model):
+    """
+    A simple table to record whether or not a Terminology CSV has already been loaded
+    """
+    hash = db.Column(db.String, primary_key=True)
+    filename = db.Column(db.String, nullable=False)
+    loaded_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
+
+    def __repr__(self):
+        return f"<WhatisPreload for file {self.filename} at {self.loaded_at}>"
