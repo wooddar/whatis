@@ -1,26 +1,26 @@
+import json
+import logging
 import os
 import uuid
-import logging
-
+from hashlib import sha224
 from pathlib import Path
-from cachetools import cached, TTLCache
-from slack.web.client import WebClient
-from slack.errors import SlackApiError
-from flask import Flask
-import json
-from flask_migrate import Migrate
-from .models import db as sqlalchemy_db, WhatisPreloader, Whatis
-from .constants import WHATIS_FIELDS
+
 from alembic import command
 from alembic.migration import MigrationContext
-from hashlib import sha224
+from cachetools import cached, TTLCache
+from flask import Flask
+from flask_migrate import Migrate
+from slack.errors import SlackApiError
+from slack.web.client import WebClient
+
+from .constants import WHATIS_FIELDS
+from .models import db as sqlalchemy_db, WhatisPreloader, Whatis
 
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 
 class WhatisApp(Flask):
-    def __init__(self, db_uri=None, config=None, preload_path = None, **kwargs):
+    def __init__(self, db_uri=None, config=None, preload_path=None, **kwargs):
         Flask.__init__(self, __name__)
 
         # Preload default configuration
@@ -33,13 +33,18 @@ class WhatisApp(Flask):
         # Configure database
         if db_uri:
             self.config["SQLALCHEMY_DATABASE_URI"] = db_uri
-        logger.debug(
-            "Using database: {}".format(self.config["SQLALCHEMY_DATABASE_URI"])
-        )
+            if self.config["SQLALCHEMY_DATABASE_URI"] == "sqlite:///:memory:":
+                self.logger.warning(
+                    "Using Sqlite in-memory database, all data will be lost when server shuts down!"
+                )
 
         # DB dialect logic - used for lookup operations
         db_dialect = self.config["SQLALCHEMY_DATABASE_URI"].split(":")[0]
-        logger.info(f"Attempting to use db dialect {db_dialect}")
+        self.logger.info(f"Attempting to use db dialect {db_dialect}")
+        if self.config.get("DEBUG") is not True:
+            self.logger.warning(
+                "It is strongly recommended that you do not use Sqlite for production deployments!"
+            )
         if not any([i == db_dialect for i in ["postgres", "sqlite"]]):
             raise RuntimeError(
                 f"Dialect {db_dialect} not supported - please use sqlite or postgres"
@@ -73,10 +78,16 @@ class WhatisApp(Flask):
         # Handle preloading an existing Terminology set
         self.handle_whatis_preload(preload_path)
 
-
         # Register Slack client on the current application instance
-        if all([self.config.get(i) is None for i in ['SLACK_SIGNING_SECRET', 'SLACK_TOKEN']]):
-            raise RuntimeError("Whatis must have both a slack signing secret and slack bot token set")
+        if all(
+            [
+                self.config.get(i) is None
+                for i in ["SLACK_SIGNING_SECRET", "SLACK_TOKEN"]
+            ]
+        ):
+            raise RuntimeError(
+                "Whatis must have both a slack signing secret and slack bot token set"
+            )
         self.sc = WebClient(self.config.get("SLACK_TOKEN"), ssl=False)
 
         from whatis.routes.slack_route import slack_blueprint
@@ -183,21 +194,41 @@ class WhatisApp(Flask):
                 if filepath.exists():
                     file_contents = open(filepath).read()
                     file_hash = sha224(file_contents.encode()).hexdigest()
-                    existing_preload = self.db.session.query(WhatisPreloader).filter(WhatisPreloader.hash == file_hash).first()
+                    existing_preload = (
+                        self.db.session.query(WhatisPreloader)
+                        .filter(WhatisPreloader.hash == file_hash)
+                        .first()
+                    )
                     if existing_preload is not None:
-                        self.logger.info(f"Existing whatis load found for the file {existing_preload}, skipping")
+                        self.logger.info(
+                            f"Existing whatis load found for the file {existing_preload}, skipping"
+                        )
                     else:
                         raw = json.loads(file_contents)
-                        self.logger.info(f"Attempting to preload terminology from the file {filepath}, {len(raw)} records found")
+                        self.logger.info(
+                            f"Attempting to preload terminology from the file {filepath}, {len(raw)} records found"
+                        )
                         for raw_whatis in raw:
-                            if all([i in raw_whatis for i in ['terminology', 'definition']]) is False or not set(raw_whatis).issubset(set(WHATIS_FIELDS)):
-                                raise RuntimeError(f"Attempt to preload Terminology failed, Whatis {raw_whatis} has an unrecognised attribute or does not contain both of [terminology, definiton]")
-                            wi = Whatis(**{'version':0, 'added_by': 'WHATIS BOT', **raw_whatis})
+                            if all(
+                                [i in raw_whatis for i in ["terminology", "definition"]]
+                            ) is False or not set(raw_whatis).issubset(
+                                set(WHATIS_FIELDS)
+                            ):
+                                raise RuntimeError(
+                                    f"Attempt to preload Terminology failed, Whatis {raw_whatis} has an unrecognised attribute or does not contain both of [terminology, definiton]"
+                                )
+                            wi = Whatis(
+                                **{"version": 0, "added_by": "WHATIS BOT", **raw_whatis}
+                            )
                             self.db.session.add(wi)
                             self.logger.debug(f"Added the Whatis {wi}")
                         # Now register the fact that we have loaded this file so it is ignored for future deployments
-                        self.db.session.add(WhatisPreloader(hash=file_hash, filename=str(filepath)))
+                        self.db.session.add(
+                            WhatisPreloader(hash=file_hash, filename=str(filepath))
+                        )
                         self.db.session.commit()
 
                 else:
-                    raise FileNotFoundError(f"Preload filepath specified {preload_path} but no file found")
+                    raise FileNotFoundError(
+                        f"Preload filepath specified {preload_path} but no file found"
+                    )

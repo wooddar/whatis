@@ -13,10 +13,10 @@ WHATIS_ALL_ID = "whatis-all"
 
 # Whatis visible fields
 WHATIS_FIELDS = [
-        "terminology",
-        "definition",
-        "notes",
-        "links",
-        "point_of_contact",
-        "added_by",
-    ]
+    "terminology",
+    "definition",
+    "notes",
+    "links",
+    "point_of_contact",
+    "added_by",
+]

@@ -1,7 +1,7 @@
 from flask import current_app
-from werkzeug.local import LocalProxy
-from sqlalchemy.orm.session import Session
 from slack.web.client import WebClient
+from sqlalchemy.orm.session import Session
+from werkzeug.local import LocalProxy
 
 __all__ = ["db_session", "slack_client"]
 

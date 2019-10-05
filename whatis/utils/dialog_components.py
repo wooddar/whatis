@@ -1,4 +1,5 @@
 import typing
+
 from slack.web.classes import dialogs
 
 from whatis import constants

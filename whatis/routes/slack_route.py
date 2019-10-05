@@ -1,18 +1,15 @@
-import logging
 import json
+import logging
 
 from flask import request, Blueprint, current_app, abort, jsonify
 from slack.web.classes.interactions import SlashCommandInteractiveEvent
-from sqlalchemy import func
 
-from whatis.utils.request import verify_slack_request
-from whatis.utils.message_components import build_whatis_message
-from whatis.utils.lookups import lookup_whatis
-from whatis.proxies import db_session
-from whatis.models import Whatis
 from whatis.routes.actions import send_create_form
 from whatis.routes.block_action_handlers import handle_block_actions
 from whatis.routes.dialog_handlers import handle_dialog_submission
+from whatis.utils.lookups import lookup_whatis
+from whatis.utils.message_components import build_whatis_message
+from whatis.utils.request import verify_slack_request
 
 slack_blueprint = Blueprint(__name__, "slack")
 

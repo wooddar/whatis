@@ -1,8 +1,8 @@
 from flask import current_app
 from slack.web.classes.interactions import DialogInteractiveEvent
 
-from whatis.utils.interaction_handler import SlackInteractionHandler
-from whatis.utils.responder import webhook_response, basic_responder_response
+from whatis import constants
+from whatis.routes.actions import create_whatis, update_whatis
 from whatis.utils.dialog_components import (
     LINKS_KEY,
     NOTES_KEY,
@@ -10,8 +10,8 @@ from whatis.utils.dialog_components import (
     DEFINITION_KEY,
     POINT_OF_CONTACT_KEY,
 )
-from whatis.routes.actions import create_whatis, update_whatis
-from whatis import constants
+from whatis.utils.interaction_handler import SlackInteractionHandler
+from whatis.utils.responder import webhook_response, basic_responder_response
 
 dialog_interactor = SlackInteractionHandler()
 

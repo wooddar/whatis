@@ -1,9 +1,11 @@
 import os
-from flask.cli import FlaskGroup
-from whatis.config import WhatisConfig
-from whatis.app import WhatisApp
-from whatis.models import Whatis
 from functools import partial
+
+from flask.cli import FlaskGroup
+
+from whatis.app import WhatisApp
+from whatis.config import WhatisConfig
+from whatis.models import Whatis
 
 runtime_context = os.getenv("RUNTIME_CONTEXT") or "local"
 

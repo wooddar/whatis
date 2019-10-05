@@ -1,7 +1,8 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from functools import partial
 from secrets import token_urlsafe
+
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
@@ -25,10 +26,11 @@ class Whatis(db.Model):  # type: ignore
         return f"<Whatis {self.terminology} - {self.id}>"
 
 
-class WhatisPreloader(db.Model):
+class WhatisPreloader(db.Model):  # type: ignore
     """
     A simple table to record whether or not a Terminology CSV has already been loaded
     """
+
     hash = db.Column(db.String, primary_key=True)
     filename = db.Column(db.String, nullable=False)
     loaded_at = db.Column(db.DateTime, nullable=False, default=datetime.now)

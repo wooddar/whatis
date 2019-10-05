@@ -1,11 +1,14 @@
-import os
-import pytest
-from unittest.mock import MagicMock, patch
-from json import loads, dumps
-from whatis.app import WhatisApp
-from whatis.models import Whatis
 import json
+import os
+from json import loads, dumps
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from whatis import constants
+from whatis.app import WhatisApp
 from whatis.config import WhatisConfig
+from whatis.models import Whatis
 from whatis.utils.dialog_components import (
     TERMINOLOGY_KEY,
     DEFINITION_KEY,
@@ -13,8 +16,6 @@ from whatis.utils.dialog_components import (
     LINKS_KEY,
     POINT_OF_CONTACT_KEY,
 )
-
-from whatis import constants
 
 TEST_WHATIS = Whatis(
     id=2,
@@ -31,8 +32,8 @@ TEST_WHATIS = Whatis(
 
 class TestingConfig(WhatisConfig):
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    SLACK_SIGNING_SECRET = 'secrety secret'
-    SLACK_TOKEN = 'tokeny token'
+    SLACK_SIGNING_SECRET = "secrety secret"
+    SLACK_TOKEN = "tokeny token"
     DEBUG = True
 
 
@@ -183,13 +184,25 @@ def test_create_new(rp, client):
 
 
 def test_preload_whatises():
-    fpath = '_testing_whatis_preload.json'
-    with open(fpath, 'w') as file:
-        file.write(json.dumps([
-            dict(terminology='eod', definition='end of day'),
-            dict(terminology='FBI', definition='Federal Bureau of Intelligence', links = 'https://www.jira.com/issues/DE-356'),
-            dict(terminology='CSA', definition='Corporate Social allowance', notes = 'Here are some notes'),
-        ]))
+    fpath = "_testing_whatis_preload.json"
+    with open(fpath, "w") as file:
+        file.write(
+            json.dumps(
+                [
+                    dict(terminology="eod", definition="end of day"),
+                    dict(
+                        terminology="FBI",
+                        definition="Federal Bureau of Intelligence",
+                        links="https://www.jira.com/issues/DE-356",
+                    ),
+                    dict(
+                        terminology="CSA",
+                        definition="Corporate Social allowance",
+                        notes="Here are some notes",
+                    ),
+                ]
+            )
+        )
 
     client = WhatisApp(config=TestingConfig, preload_path=fpath)
 
@@ -203,6 +216,4 @@ def test_preload_whatises():
     resp = tc.post("/slack/whatis", data=create_slash_command_input(text="fbi"))
     assert len(loads(resp.data)["blocks"]) == 7
 
-
     os.remove(fpath)
-

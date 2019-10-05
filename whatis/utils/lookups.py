@@ -1,8 +1,10 @@
 from typing import List
+
 from flask import current_app
-from whatis.proxies import db_session
-from whatis.models import Whatis
 from sqlalchemy import func, and_, or_, false
+
+from whatis.models import Whatis
+from whatis.proxies import db_session
 
 
 def postgres_lookup(input: str) -> List[Whatis]:

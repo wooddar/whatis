@@ -1,7 +1,9 @@
 from typing import List, Union
-from whatis.models import Whatis
-from whatis import constants
+
 from slack.web.classes import blocks, elements, messages, objects
+
+from whatis import constants
+from whatis.models import Whatis
 
 
 def build_whatis_action_confirm(title: str, text: str) -> objects.ConfirmObject:

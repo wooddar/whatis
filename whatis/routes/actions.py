@@ -1,7 +1,8 @@
-from sqlalchemy import desc
 from flask import current_app
-from whatis.proxies import db_session, slack_client
+from sqlalchemy import desc
+
 from whatis.models import Whatis
+from whatis.proxies import db_session, slack_client
 from whatis.utils import dialog_components
 
 

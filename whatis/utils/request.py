@@ -1,10 +1,7 @@
-import os
 import logging
-from typing import List
-from slack.web.client import WebClient
+
 from flask import request, abort, current_app
-from functools import partial
-from whatis import constants
+from slack.web.client import WebClient
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +19,17 @@ def verify_slack_request() -> None:
     verify_message = ""
 
     if any([timestamp == "", slack_sig == ""]):
-            verify_message += "Slack request missing timestamp or signature headers"
+        verify_message += "Slack request missing timestamp or signature headers"
     else:
-        request_verified = WebClient.validate_slack_signature(signing_secret=current_app.config['SLACK_SIGNING_SECRET'], timestamp=timestamp, signature=slack_sig, data=request_data)
+        request_verified = WebClient.validate_slack_signature(
+            signing_secret=current_app.config["SLACK_SIGNING_SECRET"],
+            timestamp=timestamp,
+            signature=slack_sig,
+            data=request_data,
+        )
 
     if request_verified is False:
-        if current_app.config['DEBUG'] is True:
+        if current_app.config["DEBUG"] is True:
             current_app.logger.info(
                 f"Request verification: {request_verified}, msg: {verify_message}"
             )
