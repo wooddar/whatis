@@ -50,7 +50,7 @@ def build_create_new_dialog(
             optional=True,
             hint="Comma separated links to documentation",
             placeholder="Did you know that you can create hyperlinks by <www.thingtolinkto.com | "
-                        "writing it like this>! Useful for long links",
+            "writing it like this>! Useful for long links",
             min_length=8,
         )
         .conversation_selector(

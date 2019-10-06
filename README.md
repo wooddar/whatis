@@ -1,7 +1,7 @@
 # whatis
 Whatis bot for Slack - let your organisation explore, curate and create business Terminology
 
-[![Actions Status](https://github.com/wooddar/whatis/workflows/Python+application/badge.svg)](https://github.com/wooddar/whatis/actions)
+![Actions Status](https://github.com/wooddar/whatis/workflows/Tests/badge.svg)
 
 
 ## Creating Terminology
@@ -27,6 +27,8 @@ Sqlite-backed Whatis instances can only use substring-type matching `ilike '%los
 
 # Installation 
 Installing the Whatis bot server is as simple as running `pip install whatis` you are probably looking to add this as a bot in your Slack workspace though!
+
+The Whatis bot server can be installed locally from this repo with `pip install -e .`
 
 
 
