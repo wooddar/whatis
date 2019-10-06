@@ -40,6 +40,7 @@ jobs:
         SLACK_SIGNING_SECRET: 'secrety secret'
     - name: Generate package dist
       run: |
+        pip install wheel setuptools six
         python setup.py sdist bdist_wheel
     - name: Publish package
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
