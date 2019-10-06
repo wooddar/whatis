@@ -129,6 +129,12 @@ class WhatisApp(Flask):
                 "KnowledgeApp has not yet been configured. Please instantiate it via `get_app_for_repo`."
             )
         migrations_path = os.path.join(os.path.dirname(__file__), "migrations")
+        # This is terrible but seems to be needed for packaging
+        migrations_path = (
+            migrations_path
+            if Path(migrations_path).exists() is True
+            else os.path.join(os.path.dirname(__file__), "whatis/migrations")
+        )
         return self.extensions["migrate"].migrate.get_config(migrations_path)
 
     def db_init(self):
