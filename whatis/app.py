@@ -33,10 +33,10 @@ class WhatisApp(Flask):
         # Configure database
         if db_uri:
             self.config["SQLALCHEMY_DATABASE_URI"] = db_uri
-            if self.config["SQLALCHEMY_DATABASE_URI"] == "sqlite:///:memory:":
-                self.logger.warning(
-                    "Using Sqlite in-memory database, all data will be lost when server shuts down!"
-                )
+        if self.config["SQLALCHEMY_DATABASE_URI"] == "sqlite:///:memory:":
+            self.logger.warning(
+                "Using Sqlite in-memory database, all data will be lost when server shuts down!"
+            )
 
         # DB dialect logic - used for lookup operations
         db_dialect = self.config["SQLALCHEMY_DATABASE_URI"].split(":")[0]

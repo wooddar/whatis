@@ -25,8 +25,10 @@ If you are using a Postgres-backed Whatis bot (**Strongly recommended for Produc
 Sqlite-backed Whatis instances can only use substring-type matching `ilike '%lost%`
 
 
-## Installation 
-`pip install whatis`
+# Installation 
+Installing the Whatis bot server is as simple as running `pip install whatis` you are probably looking to add this as a bot in your Slack workspace though!
+
+
 
 ## Running whatis
 Whatis can be run locally using the command `whatis-serve --db $DB_URL`

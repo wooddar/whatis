@@ -59,3 +59,23 @@ def lookup_whatis(input: str) -> List[Whatis]:
         raise RuntimeError(
             f"Unrecognised SQL dialect {dialect} - I don't even know how you got here!"
         )
+
+
+def get_all_whatises() -> List[Whatis]:
+    # Return all Whatises to be sent as a CSV
+    subquery_base = db_session.query(
+        Whatis.whatis_id, func.max(Whatis.version).label("version")
+    )
+    subquery_grouped = subquery_base.group_by(Whatis.whatis_id).subquery("s2")
+    query = (
+        db_session.query(Whatis)
+        .join(
+            subquery_grouped,
+            and_(
+                Whatis.whatis_id == subquery_grouped.c.whatis_id,
+                Whatis.version == subquery_grouped.c.version,
+            ),
+        )
+        .order_by(Whatis.terminology)
+    )
+    return query.all()

@@ -280,19 +280,24 @@ def test_load_from_args(preload_filepath):
 
 
 def test_slack_verification(client):
-    client.application.config['DEBUG'] = False
-    resp: Response = client.post("/slack/whatis", data=create_slash_command_input(text="fbi"))
+    client.application.config["DEBUG"] = False
+    resp: Response = client.post(
+        "/slack/whatis", data=create_slash_command_input(text="fbi")
+    )
 
     # Make sure it is denying calls with no headers
     assert resp.status_code == 403
-    assert 'Request signature verification failed' in resp.data.decode()
+    assert "Request signature verification failed" in resp.data.decode()
 
     # Make sure our verification also fails when we have correct verification headers but wrong signing secret
-    resp: Response = client.post("/slack/whatis", data=create_slash_command_input(text="fbi"),
-                                 headers = {
-                                     "X-Slack-Request-Timestamp":"1570368107",
-                                     "X-Slack-Signature":"v0=70005dbf3ebd0cd689fbc149bad4b21280b2476bbf6d9745c49e305798080bec"
-                                 })
+    resp: Response = client.post(
+        "/slack/whatis",
+        data=create_slash_command_input(text="fbi"),
+        headers={
+            "X-Slack-Request-Timestamp": "1570368107",
+            "X-Slack-Signature": "v0=70005dbf3ebd0cd689fbc149bad4b21280b2476bbf6d9745c49e305798080bec",
+        },
+    )
 
     assert resp.status_code == 403
-    assert 'Request signature verification failed' in resp.data.decode()
+    assert "Request signature verification failed" in resp.data.decode()

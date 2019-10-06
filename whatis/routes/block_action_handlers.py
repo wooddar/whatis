@@ -8,6 +8,7 @@ from whatis.routes.actions import (
     send_to_channel,
     delete_whatis,
     rollback_whatis,
+    send_all_tsv,
 )
 from whatis.utils.interaction_handler import SlackInteractionHandler
 from whatis.utils.responder import webhook_response, basic_responder_response
@@ -39,9 +40,10 @@ def update_whatis_action(action: MessageInteractiveEvent):
     send_update_form(action.trigger_id, action.value)
     return
 
+
 @block_interactor.interaction(constants.WHATIS_SEND_CHANNEL_ID)
 def send_to_channel_whatis_action(action: MessageInteractiveEvent):
-    send_to_channel(action.response_url, action.value, action.user.id)
+    send_to_channel(action.channel.id, action.value, action.user.id)
     return
 
 
@@ -57,3 +59,8 @@ def rollback_whatis_action(action: MessageInteractiveEvent):
 def delete_whatis_action(action: MessageInteractiveEvent):
     delete_whatis(action.value)
     return basic_responder_response("Whatis successfully deleted :skull:").to_dict()
+
+
+@block_interactor.interaction(constants.WHATIS_ALL_ID)
+def delete_whatis_action(action: MessageInteractiveEvent):
+    return send_all_tsv(action.user.id)

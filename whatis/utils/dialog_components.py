@@ -41,6 +41,7 @@ def build_create_new_dialog(
             name=NOTES_KEY,
             optional=True,
             hint="Other notes",
+            placeholder="Is there anything else you think your teammates should know about this terminology?",
             min_length=8,
         )
         .text_area(
@@ -48,6 +49,8 @@ def build_create_new_dialog(
             name=LINKS_KEY,
             optional=True,
             hint="Comma separated links to documentation",
+            placeholder="Did you know that you can create hyperlinks by <www.thingtolinkto.com | "
+                        "writing it like this>! Useful for long links",
             min_length=8,
         )
         .conversation_selector(

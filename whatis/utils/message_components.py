@@ -20,7 +20,8 @@ def build_whatis_actions(whatis: Whatis, is_admin: bool = False) -> blocks.Actio
         value=str(whatis.id),
         confirm=build_whatis_action_confirm(
             "Update Whatis",
-            'Are you sure you want to update this Whatis? If you do, you will be listed under "Added by"',
+            'Are you sure you want to update this Whatis? If you do, you will be listed under "Added by" and the '
+            "previous updater will be notified!",
         ),
     )
     rollback_whatis_button = elements.ButtonElement(
@@ -46,7 +47,7 @@ def build_whatis_actions(whatis: Whatis, is_admin: bool = False) -> blocks.Actio
     channel_whatis_button = elements.ButtonElement(
         text="Send to Channel",
         action_id=constants.WHATIS_SEND_CHANNEL_ID,
-        value=whatis.id,
+        value=str(whatis.id),
         confirm=build_whatis_action_confirm(
             "Send Whatis to channel?",
             "This Action will post this Whatis as visible to everyone in the current channel!",
@@ -59,7 +60,7 @@ def build_whatis_actions(whatis: Whatis, is_admin: bool = False) -> blocks.Actio
 
 
 def build_whatis_component(
-    whatis: Whatis, is_admin: bool = False
+    whatis: Whatis, is_admin: bool = False, include_buttons: bool = True
 ) -> List[Union[blocks.DividerBlock, blocks.SectionBlock, blocks.ActionsBlock]]:
     """
     Build the component that will actually hold the whatis including actions relating to it
@@ -67,7 +68,6 @@ def build_whatis_component(
     :param is_admin:
     :return:
     """
-
     whatis_fields = []
     for field in constants.WHATIS_FIELDS:
         # My god I want walrus operators already
@@ -79,21 +79,28 @@ def build_whatis_component(
                 mention_char = "@" if value.startswith("U") else "#"
                 value = f"<{mention_char}{value}>"
             whatis_fields.append(f"*{field.capitalize().replace('_',' ')}*\n{value}\n")
-    return [
-        blocks.SectionBlock(fields=whatis_fields),
-        # Add whatis action buttons
-        build_whatis_actions(whatis, is_admin),
-        # Add whatis contextual information
-        blocks.ContextBlock(
-            elements=[
-                objects.MarkdownTextObject(
-                    text=f"Last updated: {whatis.submitted_at.strftime('%Y-%m-%d')}"
-                ),
-                objects.MarkdownTextObject(text=f"{str(whatis.version)} revisions"),
-            ]
-        ),
-        blocks.DividerBlock(),
-    ]
+    component_blocks = [blocks.SectionBlock(fields=whatis_fields)]
+
+    # Add whatis action buttons
+    if include_buttons is True:
+        component_blocks.append(build_whatis_actions(whatis, is_admin))
+
+    # Add the rest of the block content
+    component_blocks.extend(
+        [
+            # Add whatis contextual information
+            blocks.ContextBlock(
+                elements=[
+                    objects.MarkdownTextObject(
+                        text=f"Last updated: {whatis.submitted_at.strftime('%Y-%m-%d')}"
+                    ),
+                    objects.MarkdownTextObject(text=f"{str(whatis.version)} revisions"),
+                ]
+            ),
+            blocks.DividerBlock(),
+        ]
+    )
+    return component_blocks
 
 
 def build_whatis_footer(is_admin: bool = False) -> blocks.ActionsBlock:
@@ -104,7 +111,18 @@ def build_whatis_footer(is_admin: bool = False) -> blocks.ActionsBlock:
         action_id=constants.CREATE_NEW_WHATIS_ID,
         value=constants.CREATE_NEW_WHATIS_ID,
     )
-    return blocks.ActionsBlock(elements=[add_new_button])
+    send_all_button = elements.ButtonElement(
+        text="See all Whatises",
+        action_id=constants.WHATIS_ALL_ID,
+        value=constants.WHATIS_ALL_ID,
+        confirm=build_whatis_action_confirm(
+            "Get all Whatises?",
+            "This action will cause me to send you a TSV of all "
+            "your organisation's terminology, this may cause "
+            "things to break or take some time.",
+        ),
+    )
+    return blocks.ActionsBlock(elements=[add_new_button, send_all_button])
 
 
 def build_whatis_message(
@@ -115,7 +133,7 @@ def build_whatis_message(
         block_list.extend(
             [
                 blocks.SectionBlock(
-                    text=f"*{'I found some things' if len(whatises) > 1 else 'I found a thing'} matching :* {original_query} :muscle:"
+                    text=f"*{'I found some terminology' if len(whatises) > 1 else 'I found a whatis'} matching :* {original_query} :muscle:"
                 ),
                 blocks.DividerBlock(),
             ]
@@ -134,12 +152,18 @@ def build_whatis_message(
     return messages.Message(blocks=block_list, text="Whatis results!")
 
 
-def build_channel_whatis(triggering_user:str, wi: Whatis) -> messages.Message:
+def build_channel_whatis(triggering_user: str, wi: Whatis) -> messages.Message:
     """
     Builds a single whatis message to send to channel
     :param wi:
     :return:
     """
-    message = messages.Message(text=f"The user <@{triggering_user} wants everyone to know about this whatis:",
-                               blocks=build_whatis_component(wi))
+    channel_blocks = build_whatis_component(wi, include_buttons=False)
+    channel_blocks.insert(
+        0,
+        blocks.SectionBlock(
+            text=f"The user <@{triggering_user}> wants everyone to know about this whatis:"
+        ),
+    )
+    message = messages.Message(text="Whatis channel message", blocks=channel_blocks)
     return message
