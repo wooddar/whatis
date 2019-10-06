@@ -5,20 +5,31 @@ Whatis bot for Slack - let your organisation explore, curate and create business
 
 
 ## Creating Terminology
-Create new Business terminology straight from Slack with Slack Dialogs - Users adding new terminology are tagged in the Added by field
+Create new Business terminology straight from Slack with Slack Dialogs - type `/whatis create` into any conversation or click the `Add new whatis` button to add a new Whatis through a Slack dialog.
+
+Users adding new terminology are tagged in the Added by field
 
 ## Curating Terminology
 By default, all users in your Slack workspace are able to Delete, Create, Update or rollback terminolgy - whatis allows you to specify "Terminology Admins" by indicating Admin Slack user IDs or Slack Channels to get Admin users from (**Note:** if you are using Admin Channels you must make sure your whatis bot is invited!)
 
-## Exploring Terminology
+Whatises always have a 'version' associated with them - this is incremented each time a whatis is updated and decremented when it is rolled back.
 
+## Exploring Terminology
+Whatis lets you explore your Company's terminology easily with the Slash command `/Whatis <Terminology>` e.g. `/whatis ebitda`. Whatis searching works differently depending on your deployment's database configuration
+
+### Postgres
+If you are using a Postgres-backed Whatis bot (**Strongly recommended for Production deployment**) then Whatis can make use of fuzzy string matching with the [fuzzystrmatch Postgres extension](https://www.postgresql.org/docs/9.1/fuzzystrmatch.html) (Levenshtein distance).
+
+
+### Sqlite
+Sqlite-backed Whatis instances can only use substring-type matching `ilike '%lost%`
 
 
 ## Installation 
 `pip install whatis`
 
 ## Running whatis
-Whatis can be run locally using the command `whatis deploy --db $DB_URL`
+Whatis can be run locally using the command `whatis-serve --db $DB_URL`
 
 ## Setting up a whatis bot on your workspace
 - Create a new bot

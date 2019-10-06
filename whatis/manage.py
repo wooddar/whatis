@@ -22,7 +22,6 @@ def recreate_db():
 @cli.command("seed_db")
 def seed_db():
     """Seeds the database."""
-    TEAM_ID = "CCX3T"
     USER_ID = "UX8FHM5"
     models = [
         Whatis(

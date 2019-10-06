@@ -105,3 +105,4 @@ venv.bak/
 *.db
 
 .idea/
+.DS_Store

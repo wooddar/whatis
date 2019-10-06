@@ -11,7 +11,7 @@ setup(
     url="https://github.com/wooddar/whatis",
     license="MIT",
     author="Hugo Darwood",
-    scripts=["scripts/whatis"],
+    scripts=["scripts/whatis-serve"],
     author_email="hugodarwood@gmail.com",
     description="A Slack app to explore, create and curate your workspace's business terminology",
     install_requires=requirements,

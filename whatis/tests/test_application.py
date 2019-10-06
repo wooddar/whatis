@@ -183,7 +183,8 @@ def test_create_new(rp, client):
     assert len(loads(resp.data)["blocks"]) == 7
 
 
-def test_preload_whatises():
+@pytest.fixture()
+def preload_filepath():
     fpath = "_testing_whatis_preload.json"
     with open(fpath, "w") as file:
         file.write(
@@ -203,17 +204,72 @@ def test_preload_whatises():
                 ]
             )
         )
+    yield fpath
+    os.remove(fpath)
 
-    client = WhatisApp(config=TestingConfig, preload_path=fpath)
+@pytest.fixture()
+def preload_filepath_broken():
+    fpath = "_testing_whatis_preload_broken.json"
+    with open(fpath, "w") as file:
+        file.write(
+            json.dumps(
+                [
+                    dict(terminology="eod", definition="end of day"),
+                    dict(
+                        terminology="FBI",
+                        definition="Federal Bureau of Intelligence",
+                        links="https://www.jira.com/issues/DE-356",
+                    ),
+                    dict(
+                        fasdfa="CSA",
+                        definition="Corporate Social allowance",
+                        notes="Here are some notes",
+                    ),
+                ]
+            )
+        )
+    yield fpath
+    os.remove(fpath)
+
+
+def test_preload_whatises(preload_filepath, preload_filepath_broken):
+    client = WhatisApp(config=TestingConfig, preload_path=preload_filepath)
 
     tc = client.test_client()
     resp = tc.post("/slack/whatis", data=create_slash_command_input(text="fbi"))
     assert len(loads(resp.data)["blocks"]) == 7
 
-    client.handle_whatis_preload(fpath)
+    client.handle_whatis_preload(preload_filepath)
 
     # Check that loads don't happen again
     resp = tc.post("/slack/whatis", data=create_slash_command_input(text="fbi"))
     assert len(loads(resp.data)["blocks"]) == 7
 
-    os.remove(fpath)
+    # Test runtime error with missing filepaths
+    with pytest.raises(FileNotFoundError):
+        client = WhatisApp(config=TestingConfig, preload_path='Idontexist.json')
+
+    # Test corrupted filepaths
+    with pytest.raises(RuntimeError):
+        client = WhatisApp(config=TestingConfig, preload_path=preload_filepath_broken)
+
+
+def test_load_from_args(preload_filepath):
+    class args:
+        db = 'sqlite:///:memory:'
+        slack_token = 'token'
+        slack_signing_secret = 'sdfasd'
+        debug = False
+        admin_user_ids = 'UX3G1N,UX5G1T'
+        admin_channel_ids = 'C67UOP'
+
+    a = args()
+    a.preload_filepath = preload_filepath
+
+    client = WhatisApp(config=WhatisConfig.from_args(a), preload_path=a.preload_filepath)
+    assert client.config.get('SQLALCHEMY_DATABASE_URI') == args.db
+    assert client.config.get('SLACK_TOKEN') == args.slack_token
+    assert client.config.get('SLACK_SIGNING_SECRET') == args.slack_signing_secret
+    assert client.config.get('DEBUG') == args.debug
+    assert client.config.get('ADMIN_CHANNEL_IDS') == args.admin_channel_ids.split(',')
+    assert client.config.get('ADMIN_USER_IDS') == args.admin_user_ids.split(',')
