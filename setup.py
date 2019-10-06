@@ -9,7 +9,7 @@ setup(
     version=__version__,
     packages=find_packages(),
     url="https://github.com/wooddar/whatis",
-    license="MIT",
+    license="mit",
     author="Hugo Darwood",
     scripts=["scripts/whatis-serve"],
     author_email="hugodarwood@gmail.com",
