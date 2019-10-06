@@ -38,6 +38,9 @@ jobs:
         PYTHONPATH: /home/runner/work/whatis/whatis/
         SLACK_TOKEN: 'Tokeny token'
         SLACK_SIGNING_SECRET: 'secrety secret'
+    - name: Generate package dist
+      run: |
+        python setup.py sdist bdist_wheel
     - name: Publish package
       if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
