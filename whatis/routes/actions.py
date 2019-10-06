@@ -3,7 +3,8 @@ from sqlalchemy import desc
 
 from whatis.models import Whatis
 from whatis.proxies import db_session, slack_client
-from whatis.utils import dialog_components
+from whatis.utils import dialog_components, responder
+from whatis.utils.message_components import build_channel_whatis
 
 
 def send_create_form(trigger_id):
@@ -16,7 +17,6 @@ def send_create_form(trigger_id):
 
 def send_update_form(trigger_id, whatis_id: int):
     slack_client.dialog_open(
-        # TODO: this needs to be whatis numerical ID
         trigger_id=trigger_id,
         dialog=dialog_components.build_update_dialog(
             whatis=get_whatis(whatis_id)
@@ -93,3 +93,8 @@ def get_whatis(id: int) -> Whatis:
 def send_all_rule():
     # TODO: Rule to send all terminology to a user as a CSV
     ...
+
+
+def send_to_channel(response_url: str, id: int, user: str):
+    wi = get_whatis(id)
+    responder.webhook_response(response_url=response_url, json=build_channel_whatis(triggering_user=user, wi=wi).to_dict())

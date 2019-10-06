@@ -36,7 +36,7 @@ parser.add_argument('--slack_token', dest='slack_token', type=str,
 parser.add_argument('--slack_signing_secret', dest='slack_signing_secret', type=str,
                           help="The Signing secret for your whatis bot")
 
-parser.add_argument('--debug', dest='debug', type=bool, default=False,
+parser.add_argument('--debug', dest='debug', default=False, action='store_true',
                           help="Should whatis be run in DEBUG mode (skips verification checks)")
 
 parser.add_argument('--admin_user_ids', dest='admin_user_ids', type=str,
@@ -66,7 +66,13 @@ parser.add_argument('--port', type=int, dest='port', help="Port to run whatis on
 
 whatis_args = parser.parse_args()
 
-WhatisDeployer(
+if whatis_args.debug is True:
+    # Deploy with flask
+    app = WhatisApp(config=WhatisConfig.from_args(whatis_args), preload_path=whatis_args.preload_filepath)
+    app.run(debug=True, port=whatis_args.port)
+else:
+    # Deploy with gunicorn
+    WhatisDeployer(
     app=WhatisApp(config=WhatisConfig.from_args(whatis_args),
                   preload_path=whatis_args.preload_filepath),
     options=dict(bind=f"0.0.0.0:{whatis_args.port or 80}")

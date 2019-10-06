@@ -31,7 +31,7 @@ def get_whatis_rule():
         return send_create_form(sc.trigger_id)
 
     elif terminology == "":
-        return "Oops! you need to give me something to search - try /whatis eod"
+        return "Oops! you need to give me something to search :pensive:"
 
     wi = lookup_whatis(terminology)
     current_app.logger.debug(f"Whatis query result for {terminology}: {wi}")

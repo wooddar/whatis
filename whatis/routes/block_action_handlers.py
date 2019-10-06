@@ -5,6 +5,7 @@ from whatis import constants
 from whatis.routes.actions import (
     send_create_form,
     send_update_form,
+    send_to_channel,
     delete_whatis,
     rollback_whatis,
 )
@@ -36,6 +37,11 @@ def create_whatis_action(action: MessageInteractiveEvent):
 @block_interactor.interaction(constants.UPDATE_WHATIS_ID)
 def update_whatis_action(action: MessageInteractiveEvent):
     send_update_form(action.trigger_id, action.value)
+    return
+
+@block_interactor.interaction(constants.WHATIS_SEND_CHANNEL_ID)
+def send_to_channel_whatis_action(action: MessageInteractiveEvent):
+    send_to_channel(action.response_url, action.value, action.user.id)
     return
 
 

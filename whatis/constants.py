@@ -6,6 +6,7 @@ UPDATE_WHATIS_ID_SUBMIT = "whatis-update"
 DELETE_WHATIS_ID = "whatis-delete"
 ROLLBACK_WHATIS_ID = "whatis-rollback"
 WHATIS_ALL_ID = "whatis-all"
+WHATIS_SEND_CHANNEL_ID = "whatis-send-channel"
 
 # Whatis visible fields
 WHATIS_FIELDS = [

@@ -43,7 +43,16 @@ def build_whatis_actions(whatis: Whatis, is_admin: bool = False) -> blocks.Actio
             "are you sure you want to do this?",
         ),
     )
-    actions = [update_whatis_button]
+    channel_whatis_button = elements.ButtonElement(
+        text="Send to Channel",
+        action_id=constants.WHATIS_SEND_CHANNEL_ID,
+        value=whatis.id,
+        confirm=build_whatis_action_confirm(
+            "Send Whatis to channel?",
+            "This Action will post this Whatis as visible to everyone in the current channel!",
+        ),
+    )
+    actions = [update_whatis_button, channel_whatis_button]
     if is_admin is True:
         actions.extend([rollback_whatis_button, delete_whatis_button])
     return blocks.ActionsBlock(elements=actions)
@@ -106,7 +115,7 @@ def build_whatis_message(
         block_list.extend(
             [
                 blocks.SectionBlock(
-                    text=f"*The following result(s) best matched :* {original_query}"
+                    text=f"*{'I found some things' if len(whatises) > 1 else 'I found a thing'} matching :* {original_query} :muscle:"
                 ),
                 blocks.DividerBlock(),
             ]
@@ -123,3 +132,14 @@ def build_whatis_message(
 
     block_list.append(build_whatis_footer(is_admin=is_admin))
     return messages.Message(blocks=block_list, text="Whatis results!")
+
+
+def build_channel_whatis(triggering_user:str, wi: Whatis) -> messages.Message:
+    """
+    Builds a single whatis message to send to channel
+    :param wi:
+    :return:
+    """
+    message = messages.Message(text=f"The user <@{triggering_user} wants everyone to know about this whatis:",
+                               blocks=build_whatis_component(wi))
+    return message

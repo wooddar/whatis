@@ -1,5 +1,3 @@
-
-
 run:
 	docker-compose up
 

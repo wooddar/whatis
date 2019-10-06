@@ -2,6 +2,7 @@ import json
 import os
 from json import loads, dumps
 from unittest.mock import MagicMock, patch
+from flask import Response
 
 import pytest
 
@@ -207,6 +208,7 @@ def preload_filepath():
     yield fpath
     os.remove(fpath)
 
+
 @pytest.fixture()
 def preload_filepath_broken():
     fpath = "_testing_whatis_preload_broken.json"
@@ -247,7 +249,7 @@ def test_preload_whatises(preload_filepath, preload_filepath_broken):
 
     # Test runtime error with missing filepaths
     with pytest.raises(FileNotFoundError):
-        client = WhatisApp(config=TestingConfig, preload_path='Idontexist.json')
+        client = WhatisApp(config=TestingConfig, preload_path="Idontexist.json")
 
     # Test corrupted filepaths
     with pytest.raises(RuntimeError):
@@ -256,20 +258,41 @@ def test_preload_whatises(preload_filepath, preload_filepath_broken):
 
 def test_load_from_args(preload_filepath):
     class args:
-        db = 'sqlite:///:memory:'
-        slack_token = 'token'
-        slack_signing_secret = 'sdfasd'
+        db = "sqlite:///:memory:"
+        slack_token = "token"
+        slack_signing_secret = "sdfasd"
         debug = False
-        admin_user_ids = 'UX3G1N,UX5G1T'
-        admin_channel_ids = 'C67UOP'
+        admin_user_ids = "UX3G1N,UX5G1T"
+        admin_channel_ids = "C67UOP"
 
     a = args()
     a.preload_filepath = preload_filepath
 
-    client = WhatisApp(config=WhatisConfig.from_args(a), preload_path=a.preload_filepath)
-    assert client.config.get('SQLALCHEMY_DATABASE_URI') == args.db
-    assert client.config.get('SLACK_TOKEN') == args.slack_token
-    assert client.config.get('SLACK_SIGNING_SECRET') == args.slack_signing_secret
-    assert client.config.get('DEBUG') == args.debug
-    assert client.config.get('ADMIN_CHANNEL_IDS') == args.admin_channel_ids.split(',')
-    assert client.config.get('ADMIN_USER_IDS') == args.admin_user_ids.split(',')
+    client = WhatisApp(
+        config=WhatisConfig.from_args(a), preload_path=a.preload_filepath
+    )
+    assert client.config.get("SQLALCHEMY_DATABASE_URI") == args.db
+    assert client.config.get("SLACK_TOKEN") == args.slack_token
+    assert client.config.get("SLACK_SIGNING_SECRET") == args.slack_signing_secret
+    assert client.config.get("DEBUG") == args.debug
+    assert client.config.get("ADMIN_CHANNEL_IDS") == args.admin_channel_ids.split(",")
+    assert client.config.get("ADMIN_USER_IDS") == args.admin_user_ids.split(",")
+
+
+def test_slack_verification(client):
+    client.application.config['DEBUG'] = False
+    resp: Response = client.post("/slack/whatis", data=create_slash_command_input(text="fbi"))
+
+    # Make sure it is denying calls with no headers
+    assert resp.status_code == 403
+    assert 'Request signature verification failed' in resp.data.decode()
+
+    # Make sure our verification also fails when we have correct verification headers but wrong signing secret
+    resp: Response = client.post("/slack/whatis", data=create_slash_command_input(text="fbi"),
+                                 headers = {
+                                     "X-Slack-Request-Timestamp":"1570368107",
+                                     "X-Slack-Signature":"v0=70005dbf3ebd0cd689fbc149bad4b21280b2476bbf6d9745c49e305798080bec"
+                                 })
+
+    assert resp.status_code == 403
+    assert 'Request signature verification failed' in resp.data.decode()
