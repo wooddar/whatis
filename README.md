@@ -26,7 +26,7 @@ Sqlite-backed Whatis instances can only use substring-type matching `ilike '%los
 
 
 # Installation 
-Installing the Whatis bot server is as simple as running `pip install whatis` you are probably looking to add this as a bot in your Slack workspace though!
+Installing the Whatis bot server is as simple as running `pip install whatis-bot` you are probably looking to add this as a bot in your Slack workspace though!
 
 The Whatis bot server can be installed locally from this repo with `pip install -e .`
 

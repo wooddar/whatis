@@ -5,7 +5,7 @@ from whatis import __version__
 requirements = open("requirements.txt").read().split("\n")
 
 setup(
-    name="whatis",
+    name="whatis-bot",
     version=__version__,
     packages=find_packages(),
     url="https://github.com/wooddar/whatis",
