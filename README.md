@@ -42,6 +42,9 @@ Whatis can be run locally using the command `whatis-serve --db $DB_URL`
 - Make a note of your bot's `slack signing secret` and `bot token`
 - Set a bot icon! You can find one already made to size in the doc_images directory here.
 
+## Running whatis bot locally - tunneling to Slack
+If you are running the Whatis bot locally you need to allow the bot to 'reach' Slack. The recommended way of doing this is via a tunneling program such as [ngrok](https://ngrok.com/) which allows you to setup a tunnel to a port on your localhost. Start your tunnel and point the Slack slash commands URL to `<your_tunnel_url>/slack` and the actions url to `<your_tunnel_url>/slack/actions`. 
+
 
 ### Environment variables
 - `ADMIN_USER_IDS` - This variable sets individual admin Slack user IDs
