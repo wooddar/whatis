@@ -62,5 +62,5 @@ def delete_whatis_action(action: MessageInteractiveEvent):
 
 
 @block_interactor.interaction(constants.WHATIS_ALL_ID)
-def delete_whatis_action(action: MessageInteractiveEvent):
+def all_whatis_action(action: MessageInteractiveEvent):
     return send_all_tsv(action.user.id)
