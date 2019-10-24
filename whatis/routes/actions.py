@@ -114,7 +114,7 @@ def send_all_tsv(user_id: str):
 
 def send_to_channel(channel_id: str, id: int, user: str):
     wi = get_whatis(id)
-    message = build_channel_whatis(triggering_user=user, wi=wi)
+    message = build_channel_whatis(triggering_user=user, whatis=wi)
     slack_client.chat_postMessage(
         channel=channel_id,
         blocks=[i.to_dict() for i in message.blocks],

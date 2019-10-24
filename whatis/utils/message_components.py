@@ -1,3 +1,6 @@
+"""
+Defines the different methods that build the Whatis component visible in Slack
+"""
 from typing import List, Union
 
 from slack.web.classes import blocks, elements, messages, objects
@@ -8,11 +11,20 @@ from whatis.models import Whatis
 
 def build_whatis_action_confirm(title: str, text: str) -> objects.ConfirmObject:
     return objects.ConfirmObject(
-        title=title, text=text, confirm="Proceed", deny="Run Away!"
+        title=title, text=text, confirm="`Accept`", deny="Cancel"
     )
 
 
 def build_whatis_actions(whatis: Whatis, is_admin: bool = False) -> blocks.ActionsBlock:
+    """
+    Adds the message button components to The Whatis message
+    Args:
+        whatis: A whatis model object
+        is_admin: Is the user this component is being built for a workspace whatis admin
+
+    Returns:
+
+    """
     update_whatis_button = elements.ButtonElement(
         text="Update",
         style="primary",
@@ -64,9 +76,14 @@ def build_whatis_component(
 ) -> List[Union[blocks.DividerBlock, blocks.SectionBlock, blocks.ActionsBlock]]:
     """
     Build the component that will actually hold the whatis including actions relating to it
-    :param whatis:
-    :param is_admin:
-    :return:
+
+    Args:
+        whatis: A whatis model object
+        is_admin: Is the user this component is being built for a workspace whatis admin
+        include_buttons: Should action buttons be included - used for channel messages
+
+    Returns: The component for each Whatis
+
     """
     whatis_fields = []
     for field in constants.WHATIS_FIELDS:
@@ -104,7 +121,15 @@ def build_whatis_component(
 
 
 def build_whatis_footer(is_admin: bool = False) -> blocks.ActionsBlock:
-    # TODO: View all button
+    """
+    Builds the footer to attach to all whatis requests
+
+    Args:
+        is_admin: Is the user this component is being built for a workspace whatis admin
+
+    Returns:
+
+    """
     add_new_button = elements.ButtonElement(
         text="Add a new Whatis!",
         style="primary",
@@ -152,13 +177,18 @@ def build_whatis_message(
     return messages.Message(blocks=block_list, text="Whatis results!")
 
 
-def build_channel_whatis(triggering_user: str, wi: Whatis) -> messages.Message:
+def build_channel_whatis(triggering_user: str, whatis: Whatis) -> messages.Message:
     """
     Builds a single whatis message to send to channel
-    :param wi:
-    :return:
+
+    Args:
+        triggering_user: The Slack ID of the user who triggered the send to channel action
+        whatis: A whatis model object
+
+    Returns: An in-channel whatis message
+
     """
-    channel_blocks = build_whatis_component(wi, include_buttons=False)
+    channel_blocks = build_whatis_component(whatis, include_buttons=False)
     channel_blocks.insert(
         0,
         blocks.SectionBlock(
