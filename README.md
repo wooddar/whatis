@@ -78,6 +78,8 @@ To load these records into whatis when it first starts:
 whatis --preload-filepath /path/to/_load_20190929.json
 ```
 
+Subsequent runs of the whatis bot will ignore the same preload file!
+
 # Running tests 
 `pytest tests/` - you may need to install pytest first depending on your Python distribution
 
