@@ -18,7 +18,7 @@ Whatises always have a 'version' associated with them - this is incremented each
 Whatis lets you explore your Company's terminology easily with the Slash command `/Whatis <Terminology>` e.g. `/whatis ebitda`. Whatis searching works differently depending on your deployment's database configuration
 
 ### Postgres
-If you are using a Postgres-backed Whatis bot (**Strongly recommended for Production deployment**) then Whatis can make use of fuzzy string matching with the [fuzzystrmatch Postgres extension](https://www.postgresql.org/docs/9.1/fuzzystrmatch.html) (Levenshtein distance).
+If you are using a Postgres-backed Whatis bot (**Strongly recommended for Production deployments**) then Whatis can make use of fuzzy string matching with the [fuzzystrmatch Postgres extension](https://www.postgresql.org/docs/9.1/fuzzystrmatch.html) (Levenshtein distance).
 
 
 ### Sqlite
