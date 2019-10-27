@@ -1,9 +1,10 @@
 name: Publish
 
 on:
-  create:
+  push:
     tags:
-    - 'v*'
+      - 'v*'
+
 
 jobs:
   build:
@@ -22,12 +23,12 @@ jobs:
         pip install -r requirements.txt
         export PYTHONPATH=`pwd`
     - name: Generate package dist
-        run: |
-          pip install wheel setuptools six
-          python setup.py sdist bdist_wheel
-      - name: Publish package
-        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.pypi_password }}
+      run: |
+        pip install wheel setuptools six
+        python setup.py sdist bdist_wheel
+    - name: Publish package
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.pypi_password }}
