@@ -1,5 +1,5 @@
-# whatis
-Whatis bot for Slack - let your organisation explore, curate and create business Terminology
+# Whatis
+Introducing the Whatis bot - Whatis lets your organisation explore, curate and create business Terminology right from Slack!
 
 ![Actions Status](https://github.com/wooddar/whatis/workflows/Tests/badge.svg)
 
