@@ -3,6 +3,7 @@ Whatis bot for Slack - let your organisation explore, curate and create business
 
 ![Actions Status](https://github.com/wooddar/whatis/workflows/Tests/badge.svg)
 
+> A managed version of the Whatis bot can now be installed straight from the Slack App directory or from https://whatis.rocks/  
 
 ## Creating Terminology
 Create new Business terminology straight from Slack with Slack Dialogs - type `/whatis create` into any conversation or click the `Add new whatis` button to add a new Whatis through a Slack dialog.
