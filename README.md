@@ -1,6 +1,6 @@
-# Whatis
-Introducing the Whatis bot - Whatis lets your organisation explore, curate and create business Terminology right from Slack!
+# This version of the Whatis bot is no longer supported. You can still install the whatis bot (with significantly improved features and support) from the Slack app store over at https://whatis.rocks
 
+# Whatis
 ![Actions Status](https://github.com/wooddar/whatis/workflows/Tests/badge.svg)
 
 > A managed version of the Whatis bot can now be installed straight from the Slack App directory or from https://whatis.rocks/  
